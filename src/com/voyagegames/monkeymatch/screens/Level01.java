@@ -28,6 +28,7 @@ public class Level01 extends AbstractScreen {
     private float mElapsedTime;
     
     private Texture mBackground;
+    private Texture mBorder;
     private Texture mGrid;
     private Texture mMonkey;
 
@@ -61,6 +62,9 @@ public class Level01 extends AbstractScreen {
         
         mMonkey = new Texture("monkey.png");
         mMonkey.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        
+        mBorder = new Texture("bkgd_border.png");
+        mBorder.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         
         mGrid = new Texture("bkgd_africa.png");
         mGrid.setFilter(TextureFilter.Linear, TextureFilter.Linear);
@@ -108,6 +112,15 @@ public class Level01 extends AbstractScreen {
         gridImage.setPosition((width - gridWidth) / 2f, (height - gridHeight) / 2f);
         gridImage.addAction(sequence( fadeIn(0.25f) ));
         mStage.addActor(gridImage);
+
+        final int borderWidth = mBorder.getWidth();
+        final int borderHeight = mBorder.getHeight();
+        final Image borderImage = new Image(new TextureRegion(mBorder, 0, 0, borderWidth, borderHeight));
+
+        borderImage.getColor().a = 0f;
+        borderImage.setPosition((width - borderWidth) / 2f, (height - borderHeight) / 2f);
+        borderImage.addAction(sequence( fadeIn(0.25f) ));
+        mStage.addActor(borderImage);
 
         final Image monkeyImage = new Image(new TextureRegion(mMonkey, 0, 0, mMonkey.getWidth(), mMonkey.getHeight()));
 
