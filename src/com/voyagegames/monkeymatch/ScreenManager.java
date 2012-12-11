@@ -5,18 +5,25 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.voyagegames.monkeymatch.screens.Level01;
+import com.voyagegames.monkeymatch.screens.LevelScreen;
 
 public class ScreenManager extends Game {
 
     private FPSLogger mFPSLogger;
-    private Level01 mScreen;
+    private LevelScreen mScreen;
 
 	@Override
 	public void create() {
         mFPSLogger = new FPSLogger();
-        mScreen = new Level01();
         
-        setScreen(mScreen);
+        try {
+        	mScreen = new Level01();
+            setScreen(mScreen);
+        } catch (final Exception e) {
+        	System.out.println(e.toString());
+        	e.printStackTrace();
+        	dispose();
+        }
 	}
  
     @Override
