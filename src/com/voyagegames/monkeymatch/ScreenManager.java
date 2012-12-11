@@ -19,6 +19,7 @@ public class ScreenManager extends Game {
         try {
         	mScreen = new Level01();
             setScreen(mScreen);
+    		Gdx.input.setInputProcessor(mScreen);
         } catch (final Exception e) {
         	System.out.println(e.toString());
         	e.printStackTrace();

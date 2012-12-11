@@ -5,28 +5,33 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.voyagegames.monkeymatch.helpers.BackgroundImage;
 import com.voyagegames.monkeymatch.helpers.DynamicGridImage;
 import com.voyagegames.monkeymatch.helpers.GridElement;
 import com.voyagegames.monkeymatch.helpers.LevelLoader;
 import com.voyagegames.monkeymatch.helpers.StaticGridImage;
+import com.voyagegames.monkeymatch.helpers.TokenDrag;
 
-public abstract class LevelScreen extends AbstractScreen {
+public abstract class LevelScreen extends AbstractScreen implements InputProcessor {
 
     private final Texture[] mGrids;
     private final Texture[] mTokens;
     private final Texture[] mGoldTokens;
 	private final LevelLoader mLevel;
-	private final int mGridElements; 
+	private final int mGridElements;
 	
     private OrthographicCamera mCamera;
     private float mElapsedTime;
+    private TokenDrag mDrag;
     
     private Texture mBackground;
     private Texture mBorder;
@@ -73,10 +78,9 @@ public abstract class LevelScreen extends AbstractScreen {
 
 	@Override
 	public void render(final float delta) {
+        mElapsedTime += delta;
     	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
     	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-    	
-        mElapsedTime += delta;
         
         super.renderBackground(delta, mCamera);
         super.renderStage(delta);
@@ -121,6 +125,7 @@ public abstract class LevelScreen extends AbstractScreen {
             image.setScale(mLevel.tokenScale);
             image.setPosition(offset, 0f);
             setupImage(image, 0.5f, 0.5f);
+            image.setTouchable(Touchable.enabled);
             
             offset += image.getWidth();
         }
@@ -158,10 +163,87 @@ public abstract class LevelScreen extends AbstractScreen {
 		
 		super.dispose();
 	}
+
+	@Override
+	public boolean touchDown(final int x, final int y, final int pointer, final int button) {
+		if (mDrag != null) {
+			return false;
+		}
+
+		final Actor a = mStage.hit(x, mStage.getHeight() - y, true);
+		
+		if (a == null) {
+			return false;
+		}
+		
+		mDrag = new TokenDrag(a, x, y);
+		return true;
+	}
+
+	@Override
+	public boolean touchDragged(final int x, final int y, final int pointer) {
+		if (mDrag == null) {
+			return false;
+		}
+
+		final float deltaX = x - mDrag.x();
+		final float deltaY = mDrag.y() - y;
+		final Actor a = mDrag.token;
+
+		a.setPosition(a.getX() + deltaX, a.getY() + deltaY);
+		mDrag.update(x, y);
+		return true;
+	}
+
+	@Override
+	public boolean touchUp(final int x, final int y, final int pointer, final int button) {
+		if (mDrag == null) {
+			return false;
+		}
+
+		final float deltaX = x - mDrag.x();
+		final float deltaY = y - mDrag.y();
+		final Actor a = mDrag.token;
+
+		a.setPosition(a.getX() + deltaX, a.getY() + deltaY);
+		mDrag = null;
+		return true;
+	}
+
+	@Override
+	public boolean keyDown(final int keyCode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyTyped(final char character) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyUp(final int keyCode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(final int x, final int y) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean scrolled(final int amount) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 	private void setupImage(final Image image, final float delay, final float fadeIn) {
         image.getColor().a = 0f;
         image.addAction(sequence( delay(delay), fadeIn(fadeIn) ));
+        image.setTouchable(Touchable.disabled);
         mStage.addActor(image);
 	}
 
