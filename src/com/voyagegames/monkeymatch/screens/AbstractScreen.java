@@ -1,13 +1,8 @@
 package com.voyagegames.monkeymatch.screens;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.voyagegames.monkeymatch.helpers.PositionedTextureRegion;
 
 public abstract class AbstractScreen implements Screen {
 	
