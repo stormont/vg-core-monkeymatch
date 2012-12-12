@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.voyagegames.monkeymatch.helpers.DynamicGridImage;
+import com.voyagegames.monkeymatch.helpers.GridBox;
 import com.voyagegames.monkeymatch.helpers.GridElement;
 import com.voyagegames.monkeymatch.helpers.LevelLoader;
 import com.voyagegames.monkeymatch.helpers.StaticGridImage;
@@ -31,10 +32,10 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 	private final LevelLoader mLevel;
 	private final int mGridElements;
 	private final List<Actor> mTargets = new ArrayList<Actor>();
+	private final List<GridBox> mGridBoxes = new ArrayList<GridBox>();
 	
     private float mElapsedTime;
     private TokenDrag mDrag;
-    
     private Texture mBackground;
     private Texture mBorder;
     private Texture mGridBackground;
@@ -151,6 +152,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
             image.setPosition(((e.x + mLevel.tokenX) * scale) + gridX, ((e.y + mLevel.tokenY) * scale) + gridY);
             setupImage(image, 2f, 0.5f, mLevel.tokenScale * scale);
             mTargets.add(image);
+            mGridBoxes.add(new GridBox(image, gridImages[i].image));
         }
 	}
 
@@ -305,6 +307,15 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		closestTarget.clearActions();
 		closestTarget.addAction( removeActor() );
 		mTargets.remove(closestTarget);
+		
+		for (final GridBox b : mGridBoxes) {
+			if (b.target == closestTarget) {
+				b.box.clearActions();
+				b.box.addAction( removeActor() );
+				mGridBoxes.remove(b);
+				break;
+			}
+		}
 	}
 
 }
