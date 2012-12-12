@@ -3,6 +3,7 @@
 	<global>
 	    <background>backgrounds/africa/bkgd_africa.png</background>
 		<tokenscale>0.45f</tokenscale>
+		<spawntime>2f</spawntime>
 		<numrows>4</numrows>
 		<numcols>4</numcols>
         <tokenx>32.5f</tokenx>

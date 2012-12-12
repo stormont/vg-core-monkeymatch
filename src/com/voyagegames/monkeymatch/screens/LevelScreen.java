@@ -7,6 +7,7 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -26,6 +27,11 @@ import com.voyagegames.monkeymatch.helpers.TokenDrag;
 
 public abstract class LevelScreen extends AbstractScreen implements InputProcessor {
 
+	private Random mRandomGenerator = new Random();
+	
+    private final boolean[] mGridInUse;
+    private final boolean[] mGridCollected;
+    private final DynamicGridImage[] mGridImages;
     private final Texture[] mGrids;
     private final Texture[] mTokens;
     private final Texture[] mGoldTokens;
@@ -34,17 +40,25 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 	private final List<Actor> mTargets = new ArrayList<Actor>();
 	private final List<GridBox> mGridBoxes = new ArrayList<GridBox>();
 	
+	private float mScale;
+	private float mTargetSpawnTime;
+	private float mLastTargetTime;
     private float mElapsedTime;
     private TokenDrag mDrag;
     private Texture mBackground;
     private Texture mBorder;
     private Texture mGridBackground;
+    private StaticGridImage mGridBackgroundImage;
 
 	public LevelScreen(final String levelXML) throws Exception {
 		super();
 		
 		mLevel = new LevelLoader(levelXML);
+		mTargetSpawnTime = mLevel.spawnTime;
 		mGridElements = mLevel.numRows * mLevel.numCols;
+		mGridInUse = new boolean[mGridElements];
+		mGridCollected = new boolean[mGridElements];
+		mGridImages = new DynamicGridImage[mGridElements];
 		mGrids = new Texture[mGridElements];
 		mTokens = new Texture[mLevel.tokens.size()];
 		mGoldTokens = new Texture[mLevel.tokens.size()];
@@ -82,6 +96,8 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 	@Override
 	public void render(final float delta) {
         mElapsedTime += delta;
+        checkForNewSpawn();
+        
     	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
     	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         super.renderStage(delta);
@@ -93,66 +109,50 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		
         mStage.clear();
         mTargets.clear();
-        
-        final StaticGridImage background = new StaticGridImage(mBackground, width, height);
-        final float scale = width < height ?
+        mGridBackgroundImage = new StaticGridImage(mGridBackground, width, height);
+        mScale = width < height ?
         		((float)width) / ((float)mBackground.getWidth()) :
         		((float)height) / ((float)mBackground.getHeight());
+
+        final float gridX = (width - (mGridBackgroundImage.image.getWidth() * mScale)) / 2f;
+        final float gridY = (height - (mGridBackgroundImage.image.getHeight() * mScale)) / 2f;
+        final StaticGridImage background = new StaticGridImage(mBackground, width, height);
         
         background.image.setPosition(0f, 0f);
         background.image.setWidth(width);
         background.image.setHeight(height);
         setupImage(background.image, 0f, 0.25f, 1f);
-
-        final StaticGridImage gridBackground = new StaticGridImage(mGridBackground, width, height);
-        final float gridX = (width - (gridBackground.image.getWidth() * scale)) / 2f;
-        final float gridY = (height - (gridBackground.image.getHeight() * scale)) / 2f;
         
-        gridBackground.image.setPosition(gridX, gridY);
-        setupImage(gridBackground.image, 0f, 0.25f, scale);
-        
-        final DynamicGridImage[] gridImages = new DynamicGridImage[mGridElements];
+        mGridBackgroundImage.image.setPosition(gridX, gridY);
+        setupImage(mGridBackgroundImage.image, 0f, 0.25f, mScale);
 
         for (int i = 0; i < mGridElements; ++i) {
-    		gridImages[i] = new DynamicGridImage(
+        	mGridImages[i] = new DynamicGridImage(
     				mGrids[i],
     				gridX,
     				gridY,
-    				mLevel.grids.get(i).x * scale,
-    				mLevel.grids.get(i).y * scale);
-            setupImage(gridImages[i].image, 1.25f, 0.5f, scale);
+    				mLevel.grids.get(i).x * mScale,
+    				mLevel.grids.get(i).y * mScale);
+            setupImage(mGridImages[i].image, 1.25f, 0.5f, mScale);
         }
 
         final StaticGridImage gridBorder = new StaticGridImage(mBorder, width, height);
         final float borderX = ((float)(mBorder.getWidth() - mGridBackground.getWidth())) / 2f;
         final float borderY = ((float)(mBorder.getHeight() - mGridBackground.getHeight())) / 2f;
         
-        gridBorder.image.setPosition(gridX - (borderX * scale), gridY - (borderY * scale));
-        setupImage(gridBorder.image, 0f, 0.25f, scale);
+        gridBorder.image.setPosition(gridX - (borderX * mScale), gridY - (borderY * mScale));
+        setupImage(gridBorder.image, 0f, 0.25f, mScale);
 
         float offset = 0f;
         
         for (final Texture t : mTokens) {
             final Image image = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
             
-            image.setPosition(offset * scale, 0f);
-            setupImage(image, 0.5f, 0.5f, mLevel.tokenScale * scale);
+            image.setPosition(offset * mScale, 0f);
+            setupImage(image, 0.5f, 0.5f, mLevel.tokenScale * mScale);
             image.setTouchable(Touchable.enabled);
             
             offset += image.getWidth();
-        }
-
-        
-        // TODO
-    	final Texture t = mGoldTokens[0];
-        for (int i = 0; i < mGridElements; ++i) {
-            final Image image = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
-            final GridElement e = mLevel.grids.get(i);
-            
-            image.setPosition(((e.x + mLevel.tokenX) * scale) + gridX, ((e.y + mLevel.tokenY) * scale) + gridY);
-            setupImage(image, 2f, 0.5f, mLevel.tokenScale * scale);
-            mTargets.add(image);
-            mGridBoxes.add(new GridBox(image, gridImages[i].image));
         }
 	}
 
@@ -223,36 +223,6 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		mDrag = null;
 		return true;
 	}
-
-	@Override
-	public boolean keyDown(final int keyCode) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean keyTyped(final char character) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean keyUp(final int keyCode) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean mouseMoved(final int x, final int y) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean scrolled(final int amount) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	
 	private void setupImage(final Image image, final float delay, final float fadeIn, final float scale) {
         image.getColor().a = 0f;
@@ -262,10 +232,68 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         mStage.addActor(image);
 	}
 	
+	private void spawnTarget(final int gridIndex, final int tokenIndex) {
+		if (
+				gridIndex < 0 || gridIndex > mGridImages.length ||
+				tokenIndex < 0 || tokenIndex > mGoldTokens.length) {
+			return;
+		}
+		
+    	final Texture t = mGoldTokens[tokenIndex];
+        final float gridX = (mStage.getWidth() - (mGridBackgroundImage.image.getWidth() * mScale)) / 2f;
+        final float gridY = (mStage.getHeight() - (mGridBackgroundImage.image.getHeight() * mScale)) / 2f;
+        final Image image = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
+        final GridElement e = mLevel.grids.get(gridIndex);
+        
+        image.setPosition(((e.x + mLevel.tokenX) * mScale) + gridX, ((e.y + mLevel.tokenY) * mScale) + gridY);
+        setupImage(image, 2f, 0.5f, mLevel.tokenScale * mScale);
+        mTargets.add(image);
+        mGridBoxes.add(new GridBox(gridIndex, image, mGridImages[gridIndex].image));
+	}
+	
+	private void checkForNewSpawn() {
+        if (mLastTargetTime > 0 && (mElapsedTime - mLastTargetTime) < mTargetSpawnTime) {
+        	return;
+        }
+        
+        int countInUse = 0;
+        int countCollected = 0;
+        
+        for (countInUse = 0; countInUse < mGridInUse.length; ++countInUse) {
+        	if (mGridCollected[countInUse] == true) {
+        		++countCollected;
+        		continue;
+        	}
+        	
+        	if (mGridInUse[countInUse] == false) {
+        		break;
+        	}
+        }
+        
+        if (countCollected == mGridElements) {
+        	// TODO Trigger victory
+        	return;
+        }
+        
+        if (countInUse == mGridElements) {
+        	return;
+        }
+    
+    	final int tokenIndex = mRandomGenerator.nextInt(this.mGoldTokens.length);
+    	int gridIndex = 0;
+    	
+    	do {
+    		gridIndex = mRandomGenerator.nextInt(mGridElements);
+    	} while (mGridInUse[gridIndex] == true || mGridCollected[gridIndex] == true);
+    	
+    	spawnTarget(gridIndex, tokenIndex);
+    	mGridInUse[gridIndex] = true;
+    	mLastTargetTime = mElapsedTime;
+	}
+	
 	private float getDistSquared(final Actor a, final float tokenX, final float tokenY) {
 		final float xDist = (a.getX() - tokenX);
 		final float yDist = (a.getY() - tokenY);
-		
 		return (xDist * xDist) + (yDist * yDist);
 	}
 	
@@ -309,12 +337,16 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		mTargets.remove(closestTarget);
 		
 		for (final GridBox b : mGridBoxes) {
-			if (b.target == closestTarget) {
-				b.box.clearActions();
-				b.box.addAction( removeActor() );
-				mGridBoxes.remove(b);
-				break;
+			if (b.target != closestTarget) {
+				continue;
 			}
+		
+			b.box.clearActions();
+			b.box.addAction( removeActor() );
+			mGridBoxes.remove(b);
+			mGridInUse[b.offset] = false;
+			mGridCollected[b.offset] = true; 
+			break;
 		}
 	}
 
