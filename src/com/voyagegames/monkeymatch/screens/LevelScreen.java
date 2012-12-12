@@ -2,7 +2,11 @@ package com.voyagegames.monkeymatch.screens;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.removeActor;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -28,6 +32,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     private final Texture[] mGoldTokens;
 	private final LevelLoader mLevel;
 	private final int mGridElements;
+	private final List<Actor> mTargets = new ArrayList<Actor>();
 	
     private OrthographicCamera mCamera;
     private float mElapsedTime;
@@ -95,6 +100,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		
         mCamera = new OrthographicCamera(width, height);
         mStage.clear();
+        mTargets.clear();
 
         final StaticGridImage gridBackground = new StaticGridImage(mGridBackground, width, height);
         setupImage(gridBackground.image, 0f, 0.25f);
@@ -140,6 +146,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
             image.setScale(mLevel.tokenScale);
             image.setPosition(e.x + mLevel.tokenX + gridX, e.y + mLevel.tokenY + gridY);
             setupImage(image, 2f, 0.5f);
+            mTargets.add(image);
         }
 	}
 
@@ -206,6 +213,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		final Actor a = mDrag.token;
 
 		a.setPosition(a.getX() + deltaX, a.getY() + deltaY);
+		testTokenHit(a);
 		mDrag = null;
 		return true;
 	}
@@ -245,6 +253,53 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         image.addAction(sequence( delay(delay), fadeIn(fadeIn) ));
         image.setTouchable(Touchable.disabled);
         mStage.addActor(image);
+	}
+	
+	private float getDistSquared(final Actor a, final float tokenX, final float tokenY) {
+		final float xDist = (a.getX() - tokenX);
+		final float yDist = (a.getY() - tokenY);
+		
+		return (xDist * xDist) + (yDist * yDist);
+	}
+	
+	private void testTokenHit(final Actor token) {
+		final List<Actor> targets = new ArrayList<Actor>();
+		final float tokenWidth = token.getWidth();
+		final float tokenHeight = token.getHeight();
+		final float radius = tokenHeight < tokenWidth ? tokenHeight / 2f : tokenWidth / 2f;
+		final float radiusSq = (radius * radius) * 0.25f;
+		final float tokenX = token.getX();
+		final float tokenY = token.getY();
+		
+		for (final Actor a : mStage.getActors()) {
+			if (!mTargets.contains(a)) {
+				continue;
+			}
+			
+			if (getDistSquared(a, tokenX, tokenY) < radiusSq) {
+				targets.add(a);
+			}
+		}
+		
+		if (targets.size() == 0) {
+			return;
+		}
+		
+		float closestDist = Float.MAX_VALUE;
+		Actor closestTarget = null;
+		
+		for (final Actor a : targets) {
+			final float distSq = getDistSquared(a, tokenX, tokenY);
+			
+			if (distSq < closestDist) {
+				closestDist = distSq;
+				closestTarget = a;
+			}
+		}
+
+		closestTarget.clearActions();
+		closestTarget.addAction( removeActor() );
+		mTargets.remove(closestTarget);
 	}
 
 }
