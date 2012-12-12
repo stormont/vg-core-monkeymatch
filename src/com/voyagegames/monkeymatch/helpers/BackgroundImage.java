@@ -7,9 +7,10 @@ public class BackgroundImage {
 	
 	public final PositionedTextureRegion region;
 	
-	public BackgroundImage(final Texture texture) {
+	public BackgroundImage(final Texture texture, final float scale) {
         final TextureRegion background = new TextureRegion(texture);
         region = new PositionedTextureRegion(background, -background.getRegionWidth() / 2f, -background.getRegionHeight() / 2f);
+        region.setScale(scale);
 	}
 
 }

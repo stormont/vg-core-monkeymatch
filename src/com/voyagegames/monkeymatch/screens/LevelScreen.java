@@ -11,14 +11,12 @@ import java.util.List;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.voyagegames.monkeymatch.helpers.BackgroundImage;
 import com.voyagegames.monkeymatch.helpers.DynamicGridImage;
 import com.voyagegames.monkeymatch.helpers.GridElement;
 import com.voyagegames.monkeymatch.helpers.LevelLoader;
@@ -34,7 +32,6 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 	private final int mGridElements;
 	private final List<Actor> mTargets = new ArrayList<Actor>();
 	
-    private OrthographicCamera mCamera;
     private float mElapsedTime;
     private TokenDrag mDrag;
     
@@ -86,27 +83,32 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         mElapsedTime += delta;
     	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
     	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        
-        super.renderBackground(delta, mCamera);
         super.renderStage(delta);
-        super.renderForeground(delta, mCamera);
 	}
 
 	@Override
 	public void resize(final int width, final int height) {
 		super.resize(width, height);
-        super.clearBackgrounds();
-        super.addBackground(new BackgroundImage(mBackground).region);
 		
-        mCamera = new OrthographicCamera(width, height);
         mStage.clear();
         mTargets.clear();
+        
+        final StaticGridImage background = new StaticGridImage(mBackground, width, height);
+        final float scale = width < height ?
+        		((float)width) / ((float)mBackground.getWidth()) :
+        		((float)height) / ((float)mBackground.getHeight());
+        
+        background.image.setPosition(0f, 0f);
+        background.image.setWidth(width);
+        background.image.setHeight(height);
+        setupImage(background.image, 0f, 0.25f, 1f);
 
         final StaticGridImage gridBackground = new StaticGridImage(mGridBackground, width, height);
-        setupImage(gridBackground.image, 0f, 0.25f);
+        final float gridX = (width - (gridBackground.image.getWidth() * scale)) / 2f;
+        final float gridY = (height - (gridBackground.image.getHeight() * scale)) / 2f;
         
-        final float gridX = gridBackground.image.getX();
-        final float gridY = gridBackground.image.getY();
+        gridBackground.image.setPosition(gridX, gridY);
+        setupImage(gridBackground.image, 0f, 0.25f, scale);
         
         final DynamicGridImage[] gridImages = new DynamicGridImage[mGridElements];
 
@@ -115,22 +117,25 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     				mGrids[i],
     				gridX,
     				gridY,
-    				mLevel.grids.get(i).x,
-    				mLevel.grids.get(i).y);
-            setupImage(gridImages[i].image, 1.25f, 0.5f);
+    				mLevel.grids.get(i).x * scale,
+    				mLevel.grids.get(i).y * scale);
+            setupImage(gridImages[i].image, 1.25f, 0.5f, scale);
         }
 
         final StaticGridImage gridBorder = new StaticGridImage(mBorder, width, height);
-        setupImage(gridBorder.image, 0f, 0.25f);
+        final float borderX = ((float)(mBorder.getWidth() - mGridBackground.getWidth())) / 2f;
+        final float borderY = ((float)(mBorder.getHeight() - mGridBackground.getHeight())) / 2f;
+        
+        gridBorder.image.setPosition(gridX - (borderX * scale), gridY - (borderY * scale));
+        setupImage(gridBorder.image, 0f, 0.25f, scale);
 
         float offset = 0f;
         
         for (final Texture t : mTokens) {
             final Image image = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
             
-            image.setScale(mLevel.tokenScale);
-            image.setPosition(offset, 0f);
-            setupImage(image, 0.5f, 0.5f);
+            image.setPosition(offset * scale, 0f);
+            setupImage(image, 0.5f, 0.5f, mLevel.tokenScale * scale);
             image.setTouchable(Touchable.enabled);
             
             offset += image.getWidth();
@@ -143,9 +148,8 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
             final Image image = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
             final GridElement e = mLevel.grids.get(i);
             
-            image.setScale(mLevel.tokenScale);
-            image.setPosition(e.x + mLevel.tokenX + gridX, e.y + mLevel.tokenY + gridY);
-            setupImage(image, 2f, 0.5f);
+            image.setPosition(((e.x + mLevel.tokenX) * scale) + gridX, ((e.y + mLevel.tokenY) * scale) + gridY);
+            setupImage(image, 2f, 0.5f, mLevel.tokenScale * scale);
             mTargets.add(image);
         }
 	}
@@ -248,10 +252,11 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		return false;
 	}
 	
-	private void setupImage(final Image image, final float delay, final float fadeIn) {
+	private void setupImage(final Image image, final float delay, final float fadeIn, final float scale) {
         image.getColor().a = 0f;
         image.addAction(sequence( delay(delay), fadeIn(fadeIn) ));
         image.setTouchable(Touchable.disabled);
+        image.setScale(scale);
         mStage.addActor(image);
 	}
 	
