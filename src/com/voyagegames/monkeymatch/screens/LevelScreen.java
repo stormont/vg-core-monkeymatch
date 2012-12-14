@@ -6,6 +6,7 @@ import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -63,6 +64,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     private Texture mHighlight;
     private Texture mBonus;
     private Texture mPoints;
+	private Actor mPointsActor;
     private StaticGridImage mGridBackgroundImage;
 
 	public LevelScreen(final String levelXML) throws Exception {
@@ -201,17 +203,16 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
             
             image.setPosition(initialPosition.x, initialPosition.y);
             setupActor(image, TIME_2, TIME_2, tokenScale);
-            addTokenActions(image);
+            image.setTouchable(Touchable.enabled);
 
             mTokens.add(new Token(image, i, initialPosition, 0f));
             mHighlights[i] = highlightImage;
             offset += imageWidth * TOKEN_SPACING;
         }
         
-        final Image pointsImage = new Image(new TextureRegion(mPoints));
-        
-        pointsImage.setPosition(width - (pointsImage.getWidth() * tokenScale), height - (pointsImage.getHeight() * tokenScale));
-        setupActor(pointsImage, TIME_2, TIME_2, tokenScale);
+        mPointsActor = new Image(new TextureRegion(mPoints));
+        mPointsActor.setPosition(width - (mPointsActor.getWidth() * tokenScale), height - (mPointsActor.getHeight() * tokenScale));
+        setupActor(mPointsActor, TIME_2, TIME_2, tokenScale);
         
         for (int i = 0; i < mLevel.numBonuses; ++i) {
         	final Actor actor = new Image(new TextureRegion(mBonus));
@@ -356,28 +357,15 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     		)));
 	}
 	
-	private void addTokenActions(final Actor actor) {
-        actor.addAction(Actions.touchable(Touchable.enabled));
-        /*
-        actor.addAction(Actions.forever(
-        		Actions.sequence(
-        				Actions.rotateTo(ROTATE_ANGLE, TIME_2),
-        				Actions.rotateTo(-ROTATE_ANGLE, TIME_2),
-        				Actions.delay(TIME_4)
-        		)
-        	));
-        	*/
-	}
-	
 	private void resetToken(final Token token) {
 		token.actor.clearActions();
 		token.actor.addAction(Actions.sequence(
 				Actions.touchable(Touchable.disabled),
 				Actions.fadeOut(TIME_1),
 				Actions.moveTo(token.initialPosition.x, token.initialPosition.y),
-				Actions.fadeIn(TIME_1)
+				Actions.fadeIn(TIME_1),
+				Actions.touchable(Touchable.enabled)
 			));
-		addTokenActions(token.actor);
 		
 		for (int i = 0; i < mTokens.size(); ++i) {
 			if (mTokens.get(i) != token) {
@@ -477,6 +465,42 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     	mLastTargetTime = mElapsedTime;
 	}
 	
+	private void removeBonus() {
+		if (mBonuses.size() == 0) {
+			return;
+		}
+	
+		final Actor bonus = mBonuses.remove(mBonuses.size() - 1);
+		bonus.clearActions();
+		bonus.addAction(Actions.sequence(
+					Actions.color(Color.RED),
+					Actions.moveBy(0f, -bonus.getHeight() / 2f, TIME_2),
+					Actions.removeActor()
+				));
+	}
+	
+	private void collectTarget(final Actor target, final float tokenX, final float tokenY) {
+		target.remove();
+		mTargets.remove(target);
+		
+		for (final GridBox b : mGridBoxes) {
+			if (b.target != target) {
+				continue;
+			}
+		
+			b.box.remove();
+			mGridBoxes.remove(b);
+			mGridCollected[b.offset] = true; 
+			break;
+		}
+		
+		mPointsActor.clearActions();
+		mPointsActor.addAction(Actions.sequence(
+					Actions.color(Color.GREEN, TIME_1),
+					Actions.color(mPointsActor.getColor(), TIME_1)
+				));
+	}
+	
 	private float getDistSquared(final Actor a, final float tokenX, final float tokenY) {
 		final float xDist = (a.getX() - tokenX);
 		final float yDist = (a.getY() - tokenY);
@@ -505,11 +529,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		}
 		
 		if (targets.size() == 0) {
-			if (mBonuses.size() > 0) {
-				final Actor bonus = mBonuses.remove(mBonuses.size() - 1);
-				bonus.remove();
-			}
-			
+			removeBonus();
 			return;
 		}
 		
@@ -524,20 +544,8 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 				closestTarget = a;
 			}
 		}
-
-		closestTarget.remove();
-		mTargets.remove(closestTarget);
 		
-		for (final GridBox b : mGridBoxes) {
-			if (b.target != closestTarget) {
-				continue;
-			}
-		
-			b.box.remove();
-			mGridBoxes.remove(b);
-			mGridCollected[b.offset] = true; 
-			break;
-		}
+		collectTarget(closestTarget, tokenX, tokenY);
 	}
 
 }
