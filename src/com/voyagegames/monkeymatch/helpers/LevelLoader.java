@@ -19,6 +19,7 @@ public class LevelLoader {
 	public final String background;
 	public final float tokenScale;
 	public final float spawnTime;
+	public final int numBonuses;
 	public final int numRows;
 	public final int numCols;
 	public final float tokenX;
@@ -40,6 +41,7 @@ public class LevelLoader {
 		this.background = getTagValue("background", (Element)globals.item(0));
 		this.tokenScale = Float.parseFloat(getTagValue("tokenscale", (Element)globals.item(0)));
 		this.spawnTime = Float.parseFloat(getTagValue("spawntime", (Element)globals.item(0)));
+		this.numBonuses = Integer.parseInt(getTagValue("bonuses", (Element)globals.item(0)));
 		this.numRows = Integer.parseInt(getTagValue("numrows", (Element)globals.item(0)));
 		this.numCols = Integer.parseInt(getTagValue("numcols", (Element)globals.item(0)));
 		this.tokenX = Float.parseFloat(getTagValue("tokenx", (Element)globals.item(0)));

@@ -25,7 +25,14 @@ import com.voyagegames.monkeymatch.helpers.TokenDrag;
 
 public abstract class LevelScreen extends AbstractScreen implements InputProcessor {
 	
-	private static final float FADE_TIME = 0.25f;
+	private static final float TOKEN_SPACING = 1.5f;
+	private static final float ROTATE_ANGLE = 10f;
+	private static final float TIME_0 = 0f;
+	private static final float TIME_1 = 0.25f;
+	private static final float TIME_2 = 0.5f;
+	private static final float TIME_3 = 0.75f;
+	private static final float TIME_4 = 1f;
+	private static final float TIME_5 = 1.25f;
 
 	private Random mRandomGenerator = new Random();
 	
@@ -42,6 +49,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 	private final List<Token> mTokens = new ArrayList<Token>();
 	private final List<Token> mTargets = new ArrayList<Token>();
 	private final List<GridBox> mGridBoxes = new ArrayList<GridBox>();
+	private final List<Actor> mBonuses = new ArrayList<Actor>();
 	
 	private boolean mVictory;
 	private float mScale;
@@ -53,6 +61,8 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     private Texture mBorder;
     private Texture mGridBackground;
     private Texture mHighlight;
+    private Texture mBonus;
+    private Texture mPoints;
     private StaticGridImage mGridBackgroundImage;
 
 	public LevelScreen(final String levelXML) throws Exception {
@@ -88,6 +98,12 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         
         mHighlight = new Texture("tokens/highlight.png");
         mHighlight.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        
+        mBonus = new Texture("tokens/banana.png");
+        mBonus.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        
+        mPoints = new Texture("tokens/bananas.png");
+        mPoints.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         
         for (int i = 0; i < mLevel.grids.size(); ++i) {
         	mGrids[i] = new Texture(mLevel.grids.get(i).asset);
@@ -138,10 +154,10 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         background.image.setPosition(0f, 0f);
         background.image.setWidth(width);
         background.image.setHeight(height);
-        setupImage(background.image, 0f, 0.25f, 1f);
+        setupActor(background.image, TIME_0, TIME_1, 1f);
         
         mGridBackgroundImage.image.setPosition(gridX, gridY);
-        setupImage(mGridBackgroundImage.image, 0f, 0.25f, mScale);
+        setupActor(mGridBackgroundImage.image, TIME_0, TIME_1, mScale);
 
         for (int i = 0; i < mGridElements; ++i) {
         	mGridImages[i] = new DynamicGridImage(
@@ -150,7 +166,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     				gridY,
     				mLevel.grids.get(i).x * mScale,
     				mLevel.grids.get(i).y * mScale);
-            setupImage(mGridImages[i].image, 1.25f, 0.5f, mScale);
+            setupActor(mGridImages[i].image, TIME_5, TIME_2, mScale);
         }
 
         final StaticGridImage gridBorder = new StaticGridImage(mBorder, width, height);
@@ -158,35 +174,67 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         final float borderY = ((float)(mBorder.getHeight() - mGridBackground.getHeight())) / 2f;
         
         gridBorder.image.setPosition(gridX - (borderX * mScale), gridY - (borderY * mScale));
-        setupImage(gridBorder.image, 0f, 0.25f, mScale);
+        setupActor(gridBorder.image, TIME_0, TIME_1, mScale);
 
+        final float tokenScale = mLevel.tokenScale * mScale;
         float totalTokenWidth = 0f;
         
         for (final Texture t : mTokenTextures) {
-        	totalTokenWidth += t.getWidth() * mScale;
+        	final float tokenWidth = t.getWidth();
+        	totalTokenWidth += tokenWidth * tokenScale * TOKEN_SPACING;
         }
 
         float offset = (((float)width) - totalTokenWidth) / 2f;
         
-        final TextureRegion highlight = new TextureRegion(mHighlight, 0, 0, mHighlight.getWidth(), mHighlight.getHeight());
+        final TextureRegion highlight = new TextureRegion(mHighlight);
         
         for (int i = 0; i < mTokenTextures.length; ++i) {
         	final Texture t = mTokenTextures[i];
-            final Image image = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
-            final float imageWidth = image.getWidth() * mScale;
-            final Vector2 initialPosition = new Vector2(offset + (imageWidth / 4f), 0f);
+            final Image image = new Image(new TextureRegion(t));
+            final float imageWidth = image.getWidth() * tokenScale;
+            final Vector2 initialPosition = new Vector2(offset + (imageWidth / 2f * mLevel.tokenScale), 0f);
             final Image highlightImage = new Image(highlight);
             
             highlightImage.setPosition(initialPosition.x, initialPosition.y);
-            setupImage(highlightImage, 0.5f, 0.5f, mLevel.tokenScale * mScale);
+            setupActor(highlightImage, TIME_2, TIME_2, tokenScale);
+            addHighlightActions(highlightImage);
             
             image.setPosition(initialPosition.x, initialPosition.y);
-            setupImage(image, 0.5f, 0.5f, mLevel.tokenScale * mScale);
-            image.setTouchable(Touchable.enabled);
+            setupActor(image, TIME_2, TIME_2, tokenScale);
+            addTokenActions(image);
 
             mTokens.add(new Token(image, i, initialPosition, 0f));
             mHighlights[i] = highlightImage;
-            offset += imageWidth;
+            offset += imageWidth * TOKEN_SPACING;
+        }
+        
+        final Image pointsImage = new Image(new TextureRegion(mPoints));
+        
+        pointsImage.setPosition(width - (pointsImage.getWidth() * tokenScale), height - (pointsImage.getHeight() * tokenScale));
+        setupActor(pointsImage, TIME_2, TIME_2, tokenScale);
+        
+        for (int i = 0; i < mLevel.numBonuses; ++i) {
+        	final Actor actor = new Image(new TextureRegion(mBonus));
+        	final float halfActorWidth = actor.getWidth() * 0.5f * tokenScale;
+        	final float halfActorHeight = actor.getHeight() * 0.5f * tokenScale;
+        	
+        	actor.setOrigin(
+        			halfActorWidth,
+        			halfActorHeight);
+        	actor.setPosition(
+        			((float)i) * halfActorWidth - halfActorWidth,
+        			-(halfActorHeight * 0.5f) + height - (halfActorHeight * 2f));
+            setupActor(actor, TIME_2, TIME_2, tokenScale);
+            actor.addAction(Actions.sequence(
+            			Actions.delay(TIME_3),
+            			Actions.forever(
+            					Actions.sequence(
+            							Actions.rotateTo(ROTATE_ANGLE, TIME_5),
+            							Actions.rotateTo(-ROTATE_ANGLE, TIME_5)
+            					)
+            			)
+            	));
+            mBonuses.add(actor);
         }
 	}
 
@@ -196,6 +244,8 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		mBackground.dispose();
 		mGridBackground.dispose();
 		mHighlight.dispose();
+		mBonus.dispose();
+		mPoints.dispose();
 		
 		for (final Texture t : mGrids) {
 			t.dispose();
@@ -240,7 +290,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			final Actor highlight = mHighlights[i];
 			
 			highlight.clearActions();
-			highlight.addAction(Actions.fadeOut(FADE_TIME));
+			highlight.addAction(Actions.fadeOut(TIME_1));
 			return true;
 		}
 		
@@ -287,26 +337,47 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		return true;
 	}
 	
-	private void setupImage(final Image image, final float delay, final float fadeIn, final float scale) {
-        image.getColor().a = 0f;
-        image.setTouchable(Touchable.disabled);
-        image.addAction(Actions.sequence(
+	private void setupActor(final Actor actor, final float delay, final float fadeIn, final float scale) {
+		actor.getColor().a = 0f;
+		actor.setTouchable(Touchable.disabled);
+		actor.addAction(Actions.sequence(
         		Actions.delay(delay),
         		Actions.fadeIn(fadeIn)
         	));
-        image.setScale(scale);
-        mStage.addActor(image);
+		actor.setScale(scale);
+        mStage.addActor(actor);
+	}
+	
+	private void addHighlightActions(final Actor actor) {
+        actor.addAction(Actions.forever(Actions.sequence(
+    			Actions.fadeIn(TIME_4),
+    			Actions.delay(TIME_4),
+    			Actions.fadeOut(TIME_4)
+    		)));
+	}
+	
+	private void addTokenActions(final Actor actor) {
+        actor.addAction(Actions.touchable(Touchable.enabled));
+        /*
+        actor.addAction(Actions.forever(
+        		Actions.sequence(
+        				Actions.rotateTo(ROTATE_ANGLE, TIME_2),
+        				Actions.rotateTo(-ROTATE_ANGLE, TIME_2),
+        				Actions.delay(TIME_4)
+        		)
+        	));
+        	*/
 	}
 	
 	private void resetToken(final Token token) {
 		token.actor.clearActions();
 		token.actor.addAction(Actions.sequence(
 				Actions.touchable(Touchable.disabled),
-				Actions.fadeOut(FADE_TIME),
+				Actions.fadeOut(TIME_1),
 				Actions.moveTo(token.initialPosition.x, token.initialPosition.y),
-				Actions.fadeIn(FADE_TIME),
-				Actions.touchable(Touchable.enabled)
+				Actions.fadeIn(TIME_1)
 			));
+		addTokenActions(token.actor);
 		
 		for (int i = 0; i < mTokens.size(); ++i) {
 			if (mTokens.get(i) != token) {
@@ -314,11 +385,13 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			}
 			
 			final Actor highlight = mHighlights[i];
+			
 			highlight.clearActions();
 			highlight.addAction(Actions.sequence(
-					Actions.delay(FADE_TIME),
-					Actions.fadeIn(FADE_TIME)
+					Actions.delay(TIME_1),
+					Actions.fadeIn(TIME_1)
 				));
+			addHighlightActions(highlight);
 			break;
 		}
 	}
@@ -337,7 +410,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         final GridElement e = mLevel.grids.get(gridIndex);
         
         image.setPosition(((e.x + mLevel.tokenX) * mScale) + gridX, ((e.y + mLevel.tokenY) * mScale) + gridY);
-        setupImage(image, 2f, 0.5f, mLevel.tokenScale * mScale);
+        setupActor(image, 2f, 0.5f, mLevel.tokenScale * mScale);
         mTargets.add(new Token(image, tokenIndex, null, 0f));
         mGridBoxes.add(new GridBox(gridIndex, image, mGridImages[gridIndex].image));
 	}
@@ -432,6 +505,11 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		}
 		
 		if (targets.size() == 0) {
+			if (mBonuses.size() > 0) {
+				final Actor bonus = mBonuses.remove(mBonuses.size() - 1);
+				bonus.remove();
+			}
+			
 			return;
 		}
 		
@@ -447,8 +525,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			}
 		}
 
-		closestTarget.clearActions();
-		closestTarget.addAction( Actions.removeActor() );
+		closestTarget.remove();
 		mTargets.remove(closestTarget);
 		
 		for (final GridBox b : mGridBoxes) {
@@ -456,9 +533,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 				continue;
 			}
 		
-			b.box.clearActions();
-			b.box.addAction( Actions.removeActor() );
-			
+			b.box.remove();
 			mGridBoxes.remove(b);
 			mGridCollected[b.offset] = true; 
 			break;
