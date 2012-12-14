@@ -1,15 +1,14 @@
 package com.voyagegames.monkeymatch.helpers;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class TokenDrag {
 	
-	public final Actor token;
+	public final Token token;
 	
 	private float mX;
 	private float mY;
 	
-	public TokenDrag(final Actor token, final float x, final float y) {
+	public TokenDrag(final Token token, final float x, final float y) {
 		this.token = token;
 		this.mX = x;
 		this.mY = y;

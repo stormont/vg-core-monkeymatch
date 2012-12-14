@@ -24,6 +24,7 @@ public class LevelLoader {
 	public final float tokenX;
 	public final float tokenY;
 	public final List<String> tokens = new ArrayList<String>();
+	public final List<Float> tokenWeights = new ArrayList<Float>();
 	public final List<GridElement> grids = new ArrayList<GridElement>();
 	
 	public LevelLoader(final String path) throws SAXException, IOException, ParserConfigurationException {
@@ -33,7 +34,7 @@ public class LevelLoader {
 		doc.getDocumentElement().normalize();
 		
 		final NodeList globals = doc.getElementsByTagName("global");
-		final NodeList tokens = doc.getElementsByTagName("tokens");
+		final NodeList tokens = doc.getElementsByTagName("tokenasset");
 		final NodeList gridElements = doc.getElementsByTagName("gridelement");
 
 		this.background = getTagValue("background", (Element)globals.item(0));
@@ -43,9 +44,14 @@ public class LevelLoader {
 		this.numCols = Integer.parseInt(getTagValue("numcols", (Element)globals.item(0)));
 		this.tokenX = Float.parseFloat(getTagValue("tokenx", (Element)globals.item(0)));
 		this.tokenY = Float.parseFloat(getTagValue("tokeny", (Element)globals.item(0)));
- 
+
 		for (int i = 0; i < tokens.getLength(); ++i) {
-			this.tokens.add(getTagValue("asset", (Element)tokens.item(i)));
+			final Node node = tokens.item(i);
+		   
+			if (node.getNodeType() == Node.ELEMENT_NODE) {
+				this.tokens.add(getTagValue("asset", (Element)node));
+				this.tokenWeights.add(Float.parseFloat(getTagValue("weight", (Element)node)));
+			}
 		}
  
 		for (int i = 0; i < gridElements.getLength(); ++i) {

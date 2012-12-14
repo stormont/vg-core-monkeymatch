@@ -1,10 +1,5 @@
 package com.voyagegames.monkeymatch.screens;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.removeActor;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,17 +10,22 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.voyagegames.monkeymatch.helpers.DynamicGridImage;
 import com.voyagegames.monkeymatch.helpers.GridBox;
 import com.voyagegames.monkeymatch.helpers.GridElement;
 import com.voyagegames.monkeymatch.helpers.LevelLoader;
 import com.voyagegames.monkeymatch.helpers.StaticGridImage;
+import com.voyagegames.monkeymatch.helpers.Token;
 import com.voyagegames.monkeymatch.helpers.TokenDrag;
 
 public abstract class LevelScreen extends AbstractScreen implements InputProcessor {
+	
+	private static final float FADE_TIME = 0.25f;
 
 	private Random mRandomGenerator = new Random();
 	
@@ -33,11 +33,13 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     private final boolean[] mGridCollected;
     private final DynamicGridImage[] mGridImages;
     private final Texture[] mGrids;
-    private final Texture[] mTokens;
+    private final Texture[] mTokenTextures;
     private final Texture[] mGoldTokens;
 	private final LevelLoader mLevel;
 	private final int mGridElements;
-	private final List<Actor> mTargets = new ArrayList<Actor>();
+	
+	private final List<Token> mTokens = new ArrayList<Token>();
+	private final List<Token> mTargets = new ArrayList<Token>();
 	private final List<GridBox> mGridBoxes = new ArrayList<GridBox>();
 	
 	private float mScale;
@@ -60,7 +62,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		mGridCollected = new boolean[mGridElements];
 		mGridImages = new DynamicGridImage[mGridElements];
 		mGrids = new Texture[mGridElements];
-		mTokens = new Texture[mLevel.tokens.size()];
+		mTokenTextures = new Texture[mLevel.tokens.size()];
 		mGoldTokens = new Texture[mLevel.tokens.size()];
 	}
 
@@ -86,18 +88,16 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         }
 
         for (int i = 0; i < mLevel.tokens.size(); ++i) {
-        	mTokens[i] = new Texture("tokens/" + mLevel.tokens.get(i));
+        	mTokenTextures[i] = new Texture("tokens/" + mLevel.tokens.get(i));
         	mGoldTokens[i] = new Texture("tokens/gold" + mLevel.tokens.get(i));
-        	mTokens[i].setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        	mTokenTextures[i].setFilter(TextureFilter.Linear, TextureFilter.Linear);
         	mGoldTokens[i].setFilter(TextureFilter.Linear, TextureFilter.Linear);
         }
 	}
 
 	@Override
 	public void render(final float delta) {
-        mElapsedTime += delta;
-        checkForNewSpawn();
-        
+        update(delta);
     	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
     	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         super.renderStage(delta);
@@ -108,7 +108,14 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		super.resize(width, height);
 		
         mStage.clear();
+        mTokens.clear();
         mTargets.clear();
+        
+        for (int i = 0; i < mGridElements; ++i) {
+        	mGridInUse[i] = false;
+        	mGridCollected[i] = false;
+        }
+        
         mGridBackgroundImage = new StaticGridImage(mGridBackground, width, height);
         mScale = width < height ?
         		((float)width) / ((float)mBackground.getWidth()) :
@@ -143,16 +150,26 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         gridBorder.image.setPosition(gridX - (borderX * mScale), gridY - (borderY * mScale));
         setupImage(gridBorder.image, 0f, 0.25f, mScale);
 
-        float offset = 0f;
+        float totalTokenWidth = 0f;
         
-        for (final Texture t : mTokens) {
+        for (final Texture t : mTokenTextures) {
+        	totalTokenWidth += t.getWidth() * mScale;
+        }
+
+        float offset = (((float)width) - totalTokenWidth) / 2f;
+        
+        for (int i = 0; i < mTokenTextures.length; ++i) {
+        	final Texture t = mTokenTextures[i];
             final Image image = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
+            final float imageWidth = image.getWidth() * mScale;
+            final Vector2 initialPosition = new Vector2(offset + (imageWidth / 4f), 0f);
             
-            image.setPosition(offset * mScale, 0f);
+            image.setPosition(initialPosition.x, initialPosition.y);
             setupImage(image, 0.5f, 0.5f, mLevel.tokenScale * mScale);
             image.setTouchable(Touchable.enabled);
-            
-            offset += image.getWidth();
+
+            mTokens.add(new Token(image, i, initialPosition, 0f));
+            offset += imageWidth;
         }
 	}
 
@@ -166,7 +183,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			t.dispose();
 		}
 		
-		for (final Texture t : mTokens) {
+		for (final Texture t : mTokenTextures) {
 			t.dispose();
 		}
 		
@@ -189,8 +206,16 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			return false;
 		}
 		
-		mDrag = new TokenDrag(a, x, y);
-		return true;
+		for (final Token t : mTokens) {
+			if (t.actor != a) {
+				continue;
+			}
+			
+			mDrag = new TokenDrag(t, x, y);
+			return true;
+		}
+		
+		return false;
 	}
 
 	@Override
@@ -201,7 +226,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
 		final float deltaX = x - mDrag.x();
 		final float deltaY = mDrag.y() - y;
-		final Actor a = mDrag.token;
+		final Actor a = mDrag.token.actor;
 
 		a.setPosition(a.getX() + deltaX, a.getY() + deltaY);
 		mDrag.update(x, y);
@@ -216,25 +241,40 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
 		final float deltaX = x - mDrag.x();
 		final float deltaY = y - mDrag.y();
-		final Actor a = mDrag.token;
+		final Token t = mDrag.token;
 
-		a.setPosition(a.getX() + deltaX, a.getY() + deltaY);
-		testTokenHit(a);
+		t.actor.setPosition(t.actor.getX() + deltaX, t.actor.getY() + deltaY);
+		testTokenHit(t);
+		resetToken(t);
 		mDrag = null;
 		return true;
 	}
 	
 	private void setupImage(final Image image, final float delay, final float fadeIn, final float scale) {
         image.getColor().a = 0f;
-        image.addAction(sequence( delay(delay), fadeIn(fadeIn) ));
         image.setTouchable(Touchable.disabled);
+        image.addAction(Actions.sequence(
+        		Actions.delay(delay),
+        		Actions.fadeIn(fadeIn)
+        	));
         image.setScale(scale);
         mStage.addActor(image);
 	}
 	
+	private void resetToken(final Token token) {
+		token.actor.clearActions();
+		token.actor.addAction(Actions.sequence(
+				Actions.touchable(Touchable.disabled),
+				Actions.fadeOut(FADE_TIME),
+				Actions.moveTo(token.initialPosition.x, token.initialPosition.y),
+				Actions.fadeIn(FADE_TIME),
+				Actions.touchable(Touchable.enabled)
+			));
+	}
+	
 	private void spawnTarget(final int gridIndex, final int tokenIndex) {
 		if (
-				gridIndex < 0 || gridIndex > mGridImages.length ||
+				gridIndex  < 0 || gridIndex  > mGridImages.length ||
 				tokenIndex < 0 || tokenIndex > mGoldTokens.length) {
 			return;
 		}
@@ -247,8 +287,26 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         
         image.setPosition(((e.x + mLevel.tokenX) * mScale) + gridX, ((e.y + mLevel.tokenY) * mScale) + gridY);
         setupImage(image, 2f, 0.5f, mLevel.tokenScale * mScale);
-        mTargets.add(image);
+        mTargets.add(new Token(image, tokenIndex, null, 0f));
         mGridBoxes.add(new GridBox(gridIndex, image, mGridImages[gridIndex].image));
+	}
+	
+	private void update(final float delta) {
+        mElapsedTime += delta;
+		checkForNewSpawn();
+		
+        int countCollected = 0;
+        
+        for (int i = 0; i < mGridCollected.length; ++i) {
+        	if (mGridCollected[i] == true) {
+        		++countCollected;
+        	}
+        }
+        
+        if (countCollected == mGridElements) {
+        	// TODO Trigger victory
+        	return;
+        }
 	}
 	
 	private void checkForNewSpawn() {
@@ -257,22 +315,11 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         }
         
         int countInUse = 0;
-        int countCollected = 0;
         
         for (countInUse = 0; countInUse < mGridInUse.length; ++countInUse) {
-        	if (mGridCollected[countInUse] == true) {
-        		++countCollected;
-        		continue;
-        	}
-        	
         	if (mGridInUse[countInUse] == false) {
         		break;
         	}
-        }
-        
-        if (countCollected == mGridElements) {
-        	// TODO Trigger victory
-        	return;
         }
         
         if (countInUse == mGridElements) {
@@ -297,22 +344,24 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		return (xDist * xDist) + (yDist * yDist);
 	}
 	
-	private void testTokenHit(final Actor token) {
+	private void testTokenHit(final Token token) {
 		final List<Actor> targets = new ArrayList<Actor>();
-		final float tokenWidth = token.getWidth();
-		final float tokenHeight = token.getHeight();
+		final float tokenWidth = token.actor.getWidth();
+		final float tokenHeight = token.actor.getHeight();
 		final float radius = tokenHeight < tokenWidth ? tokenHeight / 2f : tokenWidth / 2f;
 		final float radiusSq = (radius * radius) * 0.25f;
-		final float tokenX = token.getX();
-		final float tokenY = token.getY();
+		final float tokenX = token.actor.getX();
+		final float tokenY = token.actor.getY();
 		
 		for (final Actor a : mStage.getActors()) {
-			if (!mTargets.contains(a)) {
-				continue;
-			}
-			
-			if (getDistSquared(a, tokenX, tokenY) < radiusSq) {
-				targets.add(a);
+			for (final Token t : mTargets) {
+				if (t.actor != a || t.type != token.type) {
+					continue;
+				}
+				
+				if (getDistSquared(a, tokenX, tokenY) < radiusSq) {
+					targets.add(a);
+				}
 			}
 		}
 		
@@ -333,7 +382,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		}
 
 		closestTarget.clearActions();
-		closestTarget.addAction( removeActor() );
+		closestTarget.addAction( Actions.removeActor() );
 		mTargets.remove(closestTarget);
 		
 		for (final GridBox b : mGridBoxes) {
@@ -342,9 +391,9 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			}
 		
 			b.box.clearActions();
-			b.box.addAction( removeActor() );
+			b.box.addAction( Actions.removeActor() );
+			
 			mGridBoxes.remove(b);
-			mGridInUse[b.offset] = false;
 			mGridCollected[b.offset] = true; 
 			break;
 		}

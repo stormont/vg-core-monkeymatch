@@ -3,15 +3,22 @@
 	<global>
 	    <background>backgrounds/africa/bkgd_africa.png</background>
 		<tokenscale>0.45f</tokenscale>
-		<spawntime>2f</spawntime>
+		<spawntime>1.5f</spawntime>
 		<numrows>4</numrows>
 		<numcols>4</numcols>
         <tokenx>32.5f</tokenx>
         <tokeny>14.5f</tokeny>
-		<tokens>
-		    <asset>monkey.png</asset>
-		</tokens>
 	</global>
+	<tokens>
+	    <tokenasset>
+	    	<asset>monkey.png</asset>
+	    	<weight>0.8f</weight>
+	    </tokenasset>
+	    <tokenasset>
+	    	<asset>bananas.png</asset>
+	    	<weight>0.2f</weight>
+	    </tokenasset>
+	</tokens>
 	<grid>
 	    <gridelement>
 	        <asset>backgrounds/africa/bkgd_africa_1_1.png</asset>
