@@ -12,7 +12,7 @@
 	<tokens>
 	    <tokenasset>
 	    	<asset>monkey.png</asset>
-	    	<topweight>0.8f</topweight>
+	    	<topweight>0.7f</topweight>
 	    </tokenasset>
 	    <tokenasset>
 	    	<asset>bananas.png</asset>

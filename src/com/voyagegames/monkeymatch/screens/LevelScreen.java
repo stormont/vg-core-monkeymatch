@@ -35,6 +35,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     private final Texture[] mGrids;
     private final Texture[] mTokenTextures;
     private final Texture[] mGoldTokens;
+	private final Actor[] mHighlights;
 	private final LevelLoader mLevel;
 	private final int mGridElements;
 	
@@ -42,6 +43,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 	private final List<Token> mTargets = new ArrayList<Token>();
 	private final List<GridBox> mGridBoxes = new ArrayList<GridBox>();
 	
+	private boolean mVictory;
 	private float mScale;
 	private float mTargetSpawnTime;
 	private float mLastTargetTime;
@@ -50,6 +52,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     private Texture mBackground;
     private Texture mBorder;
     private Texture mGridBackground;
+    private Texture mHighlight;
     private StaticGridImage mGridBackgroundImage;
 
 	public LevelScreen(final String levelXML) throws Exception {
@@ -62,8 +65,12 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		mGridCollected = new boolean[mGridElements];
 		mGridImages = new DynamicGridImage[mGridElements];
 		mGrids = new Texture[mGridElements];
-		mTokenTextures = new Texture[mLevel.tokens.size()];
-		mGoldTokens = new Texture[mLevel.tokens.size()];
+		
+		final int tokenLength = mLevel.tokens.size();
+		
+		mTokenTextures = new Texture[tokenLength];
+		mGoldTokens = new Texture[tokenLength];
+		mHighlights = new Actor[tokenLength];
 	}
 
 	@Override
@@ -78,6 +85,9 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         
         mGridBackground = new Texture(mLevel.background);
         mGridBackground.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        
+        mHighlight = new Texture("tokens/highlight.png");
+        mHighlight.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         
         for (int i = 0; i < mLevel.grids.size(); ++i) {
         	mGrids[i] = new Texture(mLevel.grids.get(i).asset);
@@ -158,17 +168,24 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
         float offset = (((float)width) - totalTokenWidth) / 2f;
         
+        final TextureRegion highlight = new TextureRegion(mHighlight, 0, 0, mHighlight.getWidth(), mHighlight.getHeight());
+        
         for (int i = 0; i < mTokenTextures.length; ++i) {
         	final Texture t = mTokenTextures[i];
             final Image image = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
             final float imageWidth = image.getWidth() * mScale;
             final Vector2 initialPosition = new Vector2(offset + (imageWidth / 4f), 0f);
+            final Image highlightImage = new Image(highlight);
+            
+            highlightImage.setPosition(initialPosition.x, initialPosition.y);
+            setupImage(highlightImage, 0.5f, 0.5f, mLevel.tokenScale * mScale);
             
             image.setPosition(initialPosition.x, initialPosition.y);
             setupImage(image, 0.5f, 0.5f, mLevel.tokenScale * mScale);
             image.setTouchable(Touchable.enabled);
 
             mTokens.add(new Token(image, i, initialPosition, 0f));
+            mHighlights[i] = highlightImage;
             offset += imageWidth;
         }
 	}
@@ -178,6 +195,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		mBorder.dispose();
 		mBackground.dispose();
 		mGridBackground.dispose();
+		mHighlight.dispose();
 		
 		for (final Texture t : mGrids) {
 			t.dispose();
@@ -196,6 +214,10 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
 	@Override
 	public boolean touchDown(final int x, final int y, final int pointer, final int button) {
+		if (mVictory == true) {
+			return false;
+		}
+		
 		if (mDrag != null) {
 			return false;
 		}
@@ -206,12 +228,19 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			return false;
 		}
 		
-		for (final Token t : mTokens) {
+		for (int i = 0; i < mTokens.size(); ++i) {
+			final Token t = mTokens.get(i);
+		
 			if (t.actor != a) {
 				continue;
 			}
 			
 			mDrag = new TokenDrag(t, x, y);
+			
+			final Actor highlight = mHighlights[i];
+			
+			highlight.clearActions();
+			highlight.addAction(Actions.fadeOut(FADE_TIME));
 			return true;
 		}
 		
@@ -220,6 +249,10 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
 	@Override
 	public boolean touchDragged(final int x, final int y, final int pointer) {
+		if (mVictory == true) {
+			return false;
+		}
+		
 		if (mDrag == null) {
 			return false;
 		}
@@ -235,6 +268,10 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
 	@Override
 	public boolean touchUp(final int x, final int y, final int pointer, final int button) {
+		if (mVictory == true) {
+			return false;
+		}
+		
 		if (mDrag == null) {
 			return false;
 		}
@@ -270,6 +307,20 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 				Actions.fadeIn(FADE_TIME),
 				Actions.touchable(Touchable.enabled)
 			));
+		
+		for (int i = 0; i < mTokens.size(); ++i) {
+			if (mTokens.get(i) != token) {
+				continue;
+			}
+			
+			final Actor highlight = mHighlights[i];
+			highlight.clearActions();
+			highlight.addAction(Actions.sequence(
+					Actions.delay(FADE_TIME),
+					Actions.fadeIn(FADE_TIME)
+				));
+			break;
+		}
 	}
 	
 	private void spawnTarget(final int gridIndex, final int tokenIndex) {
@@ -293,6 +344,11 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 	
 	private void update(final float delta) {
         mElapsedTime += delta;
+        
+		if (mVictory == true) {
+			return;
+		}
+		
 		checkForNewSpawn();
 		
         int countCollected = 0;
@@ -304,7 +360,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         }
         
         if (countCollected == mGridElements) {
-        	// TODO Trigger victory
+        	mVictory = true;
         	return;
         }
 	}
@@ -330,7 +386,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         int tokenIndex = 0;
         
         for (final Float f : mLevel.tokenWeights) {
-        	if (weight < f) {
+        	if (weight <= f) {
         		break;
         	}
         	
