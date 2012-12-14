@@ -50,7 +50,7 @@ public class LevelLoader {
 		   
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				this.tokens.add(getTagValue("asset", (Element)node));
-				this.tokenWeights.add(Float.parseFloat(getTagValue("weight", (Element)node)));
+				this.tokenWeights.add(Float.parseFloat(getTagValue("topweight", (Element)node)));
 			}
 		}
  

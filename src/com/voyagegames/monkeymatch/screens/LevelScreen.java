@@ -325,8 +325,18 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         if (countInUse == mGridElements) {
         	return;
         }
+        
+        final float weight = mRandomGenerator.nextFloat();
+        int tokenIndex = 0;
+        
+        for (final Float f : mLevel.tokenWeights) {
+        	if (weight < f) {
+        		break;
+        	}
+        	
+        	++tokenIndex;
+        }
     
-    	final int tokenIndex = mRandomGenerator.nextInt(this.mGoldTokens.length);
     	int gridIndex = 0;
     	
     	do {
