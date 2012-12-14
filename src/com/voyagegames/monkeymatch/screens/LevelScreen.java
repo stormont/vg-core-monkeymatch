@@ -28,6 +28,7 @@ import com.voyagegames.monkeymatch.helpers.TokenDrag;
 
 public abstract class LevelScreen extends AbstractScreen implements InputProcessor {
 	
+	private static final int BONUS_SCORE = 5;
 	private static final float FONT_SCALE = 0.05f;
 	private static final float TOKEN_SPACING = 1.5f;
 	private static final float ROTATE_ANGLE = 10f;
@@ -466,7 +467,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 						Actions.removeActor()
 					));
 
-			addScore(5);
+			addScore(BONUS_SCORE);
 		}
 	}
 	
