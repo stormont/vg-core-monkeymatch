@@ -26,6 +26,7 @@ public class LevelLoader {
 	public final float tokenY;
 	public final List<String> tokens = new ArrayList<String>();
 	public final List<Float> tokenWeights = new ArrayList<Float>();
+	public final List<Integer> tokenValues = new ArrayList<Integer>();
 	public final List<GridElement> grids = new ArrayList<GridElement>();
 	
 	public LevelLoader(final String path) throws SAXException, IOException, ParserConfigurationException {
@@ -53,6 +54,7 @@ public class LevelLoader {
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				this.tokens.add(getTagValue("asset", (Element)node));
 				this.tokenWeights.add(Float.parseFloat(getTagValue("topweight", (Element)node)));
+				this.tokenValues.add(Integer.parseInt(getTagValue("value", (Element)node)));
 			}
 		}
  

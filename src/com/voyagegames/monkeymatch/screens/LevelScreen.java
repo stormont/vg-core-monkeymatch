@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -26,6 +28,7 @@ import com.voyagegames.monkeymatch.helpers.TokenDrag;
 
 public abstract class LevelScreen extends AbstractScreen implements InputProcessor {
 	
+	private static final float FONT_SCALE = 0.05f;
 	private static final float TOKEN_SPACING = 1.5f;
 	private static final float ROTATE_ANGLE = 10f;
 	private static final float TIME_0 = 0f;
@@ -37,6 +40,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
 	private Random mRandomGenerator = new Random();
 	
+	private final BitmapFont mFont;
     private final boolean[] mGridInUse;
     private final boolean[] mGridCollected;
     private final DynamicGridImage[] mGridImages;
@@ -65,11 +69,13 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     private Texture mBonus;
     private Texture mPoints;
 	private Actor mPointsActor;
+	private int mPointsScore;
     private StaticGridImage mGridBackgroundImage;
 
 	public LevelScreen(final String levelXML) throws Exception {
 		super();
 		
+		mFont = new BitmapFont();
 		mLevel = new LevelLoader(levelXML);
 		mTargetSpawnTime = mLevel.spawnTime;
 		mGridElements = mLevel.numRows * mLevel.numCols;
@@ -129,6 +135,13 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
     	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         super.renderStage(delta);
+        
+        final String score = String.valueOf(mPointsScore);
+        final TextBounds bounds = mFont.getBounds(score);
+        
+        mBatch.begin();
+        mFont.draw(mBatch, score, mPointsActor.getX() - (bounds.width * 1.5f), mPointsActor.getY() + (bounds.height * 1.5f));
+        mBatch.end();
 	}
 
 	@Override
@@ -143,6 +156,8 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         	mGridInUse[i] = false;
         	mGridCollected[i] = false;
         }
+        
+        mPointsScore = 0;
         
         mGridBackgroundImage = new StaticGridImage(mGridBackground, width, height);
         mScale = width < height ?
@@ -205,7 +220,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
             setupActor(image, TIME_2, TIME_2, tokenScale);
             image.setTouchable(Touchable.enabled);
 
-            mTokens.add(new Token(image, i, initialPosition, 0f));
+            mTokens.add(new Token(image, i, initialPosition, 0f, mLevel.tokenValues.get(i)));
             mHighlights[i] = highlightImage;
             offset += imageWidth * TOKEN_SPACING;
         }
@@ -213,7 +228,10 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         mPointsActor = new Image(new TextureRegion(mPoints));
         mPointsActor.setPosition(width - (mPointsActor.getWidth() * tokenScale), height - (mPointsActor.getHeight() * tokenScale));
         setupActor(mPointsActor, TIME_2, TIME_2, tokenScale);
-        
+
+		mFont.setColor(Color.YELLOW);
+		mFont.setScale(mPointsActor.getHeight() * tokenScale * FONT_SCALE);
+		
         for (int i = 0; i < mLevel.numBonuses; ++i) {
         	final Actor actor = new Image(new TextureRegion(mBonus));
         	final float halfActorWidth = actor.getWidth() * 0.5f * tokenScale;
@@ -241,6 +259,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
 	@Override
 	public void dispose() {
+		mFont.dispose();
 		mBorder.dispose();
 		mBackground.dispose();
 		mGridBackground.dispose();
@@ -338,7 +357,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		if (target == null) {
 			removeBonus();
 		} else {
-			collectTarget(target, t.actor.getX(), t.actor.getY());
+			collectTarget(target, t);
 		}
 		
 		resetToken(t);
@@ -407,7 +426,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         
         image.setPosition(((e.x + mLevel.tokenX) * mScale) + gridX, ((e.y + mLevel.tokenY) * mScale) + gridY);
         setupActor(image, 2f, 0.5f, mLevel.tokenScale * mScale);
-        mTargets.add(new Token(image, tokenIndex, null, 0f));
+        mTargets.add(new Token(image, tokenIndex, null, 0f, 0f));
         mGridBoxes.add(new GridBox(gridIndex, image, mGridImages[gridIndex].image));
 	}
 	
@@ -487,7 +506,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 				));
 	}
 	
-	private void collectTarget(final Actor target, final float tokenX, final float tokenY) {
+	private void collectTarget(final Actor target, final Token token) {
 		target.remove();
 		mTargets.remove(target);
 		
@@ -501,6 +520,8 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			mGridCollected[b.offset] = true; 
 			break;
 		}
+		
+		mPointsScore += token.value;
 		
 		mPointsActor.clearActions();
 		mPointsActor.addAction(Actions.sequence(
