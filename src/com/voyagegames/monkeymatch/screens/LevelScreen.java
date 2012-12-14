@@ -332,7 +332,15 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		final Token t = mDrag.token;
 
 		t.actor.setPosition(t.actor.getX() + deltaX, t.actor.getY() + deltaY);
-		testTokenHit(t);
+		
+		final Actor target = getNearestHit(t);
+		
+		if (target == null) {
+			removeBonus();
+		} else {
+			collectTarget(target, t.actor.getX(), t.actor.getY());
+		}
+		
 		resetToken(t);
 		mDrag = null;
 		return true;
@@ -507,7 +515,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		return (xDist * xDist) + (yDist * yDist);
 	}
 	
-	private void testTokenHit(final Token token) {
+	private Actor getNearestHit(final Token token) {
 		final List<Actor> targets = new ArrayList<Actor>();
 		final float tokenWidth = token.actor.getWidth();
 		final float tokenHeight = token.actor.getHeight();
@@ -529,8 +537,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		}
 		
 		if (targets.size() == 0) {
-			removeBonus();
-			return;
+			return null;
 		}
 		
 		float closestDist = Float.MAX_VALUE;
@@ -545,7 +552,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			}
 		}
 		
-		collectTarget(closestTarget, tokenX, tokenY);
+		return closestTarget;
 	}
 
 }
