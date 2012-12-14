@@ -426,7 +426,7 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         
         image.setPosition(((e.x + mLevel.tokenX) * mScale) + gridX, ((e.y + mLevel.tokenY) * mScale) + gridY);
         setupActor(image, 2f, 0.5f, mLevel.tokenScale * mScale);
-        mTargets.add(new Token(image, tokenIndex, null, 0f, 0f));
+        mTargets.add(new Token(image, tokenIndex, null, 0f, 0));
         mGridBoxes.add(new GridBox(gridIndex, image, mGridImages[gridIndex].image));
 	}
 	
@@ -449,8 +449,25 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         
         if (countCollected == mGridElements) {
         	mVictory = true;
+        	performVictory();
         	return;
         }
+	}
+	
+	private void performVictory() {
+		for (int i = 0; i < mBonuses.size(); ++i) {
+			final Actor bonus = mBonuses.get(i);
+			
+			bonus.clearActions();
+			bonus.addAction(Actions.sequence(
+					Actions.delay(TIME_2 * i),	
+					Actions.color(Color.GREEN),
+						Actions.moveBy(0f, -bonus.getHeight() / 2f, TIME_2),
+						Actions.removeActor()
+					));
+
+			addScore(5);
+		}
 	}
 	
 	private void checkForNewSpawn() {
@@ -521,9 +538,11 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 			break;
 		}
 		
-		mPointsScore += token.value;
-		
-		mPointsActor.clearActions();
+		addScore(token.value);
+	}
+	
+	private void addScore(final int score) {
+		mPointsScore += score;
 		mPointsActor.addAction(Actions.sequence(
 					Actions.color(Color.GREEN, TIME_1),
 					Actions.color(mPointsActor.getColor(), TIME_1)
