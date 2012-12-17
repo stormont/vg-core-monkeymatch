@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -48,7 +49,6 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 	private final Stage       mStage;
 	private final BitmapFont  mFont;
 	private final LevelLoader mLevel;
-	private final Stage       mVictoryStage;
 	
     private final boolean[] mGridInUse;
     private final boolean[] mGridCollected;
@@ -76,6 +76,7 @@ public abstract class LevelScreen implements Screen, InputProcessor {
     private Texture mHighlight;
     private Texture mBonus;
     private Texture mPoints;
+    private Texture mTrophy;
 	private Actor mPointsActor;
 	private int mPointsScore;
     private StaticGridImage mGridBackgroundImage;
@@ -86,7 +87,6 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 		mFont = new BitmapFont();
 		mBatch = new SpriteBatch();
 		mStage = new Stage(0, 0, true);
-		mVictoryStage = new Stage(0, 0, true);
 		mLevel = new LevelLoader(levelXML);
 		
 		mTargetSpawnTime = mLevel.spawnTime;
@@ -125,6 +125,9 @@ public abstract class LevelScreen implements Screen, InputProcessor {
         mPoints = new Texture("tokens/bananas.png");
         mPoints.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         
+        mTrophy = new Texture("backgrounds/trophy.png");
+        mTrophy.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        
         for (int i = 0; i < mLevel.grids.size(); ++i) {
         	mGrids[i] = new Texture(mLevel.grids.get(i).asset);
         }
@@ -156,9 +159,6 @@ public abstract class LevelScreen implements Screen, InputProcessor {
         mBatch.begin();
         mFont.draw(mBatch, score, mPointsActor.getX() - (bounds.width * 1.5f), mPointsActor.getY() + (bounds.height * 1.5f));
         mBatch.end();
-        
-        mVictoryStage.act(delta);
-        mVictoryStage.draw();
 	}
 
 	@Override
@@ -278,7 +278,6 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 	public void dispose() {
 		mBatch.dispose();
 		mStage.dispose();
-		mVictoryStage.dispose();
 		mFont.dispose();
 		mBorder.dispose();
 		mBackground.dispose();
@@ -286,6 +285,7 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 		mHighlight.dispose();
 		mBonus.dispose();
 		mPoints.dispose();
+		mTrophy.dispose();
 		
 		for (final Texture t : mGrids) {
 			t.dispose();
@@ -486,6 +486,30 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 
 			addScore(BONUS_SCORE);
 		}
+		
+        final Actor actor = new Image(new TextureRegion(mTrophy));
+        
+        actor.addAction(Actions.sequence(
+        		Actions.delay(TIME_2 * mBonuses.size()),
+        		Actions.fadeIn(TIME_2),
+        		Actions.delay(TIME_4),
+        		new Action() {
+					@Override
+					public boolean act(float delta) {
+						for (final Actor a : mStage.getActors()) {
+							a.addAction(Actions.sequence(
+									Actions.fadeOut(TIME_2),
+									Actions.removeActor()
+								));
+						}
+						
+						return true;
+					}
+        		}
+        	));
+		actor.getColor().a = 0f;
+		actor.setTouchable(Touchable.disabled);
+		mStage.addActor(actor);
 	}
 	
 	private void checkForNewSpawn() {
