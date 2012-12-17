@@ -6,15 +6,18 @@ import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -26,7 +29,7 @@ import com.voyagegames.monkeymatch.helpers.StaticGridImage;
 import com.voyagegames.monkeymatch.helpers.Token;
 import com.voyagegames.monkeymatch.helpers.TokenDrag;
 
-public abstract class LevelScreen extends AbstractScreen implements InputProcessor {
+public abstract class LevelScreen implements Screen, InputProcessor {
 	
 	private static final int BONUS_SCORE = 5;
 	private static final float FONT_SCALE = 0.05f;
@@ -41,7 +44,12 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
 	private Random mRandomGenerator = new Random();
 	
-	private final BitmapFont mFont;
+	private final SpriteBatch mBatch;
+	private final Stage       mStage;
+	private final BitmapFont  mFont;
+	private final LevelLoader mLevel;
+	private final Stage       mVictoryStage;
+	
     private final boolean[] mGridInUse;
     private final boolean[] mGridCollected;
     private final DynamicGridImage[] mGridImages;
@@ -49,7 +57,6 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
     private final Texture[] mTokenTextures;
     private final Texture[] mGoldTokens;
 	private final Actor[] mHighlights;
-	private final LevelLoader mLevel;
 	private final int mGridElements;
 	
 	private final List<Token> mTokens = new ArrayList<Token>();
@@ -77,7 +84,11 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		super();
 		
 		mFont = new BitmapFont();
+		mBatch = new SpriteBatch();
+		mStage = new Stage(0, 0, true);
+		mVictoryStage = new Stage(0, 0, true);
 		mLevel = new LevelLoader(levelXML);
+		
 		mTargetSpawnTime = mLevel.spawnTime;
 		mGridElements = mLevel.numRows * mLevel.numCols;
 		mGridInUse = new boolean[mGridElements];
@@ -133,9 +144,11 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 	@Override
 	public void render(final float delta) {
         update(delta);
+        
     	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
     	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        super.renderStage(delta);
+        mStage.act(delta);
+        mStage.draw();
         
         final String score = String.valueOf(mPointsScore);
         final TextBounds bounds = mFont.getBounds(score);
@@ -143,11 +156,14 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
         mBatch.begin();
         mFont.draw(mBatch, score, mPointsActor.getX() - (bounds.width * 1.5f), mPointsActor.getY() + (bounds.height * 1.5f));
         mBatch.end();
+        
+        mVictoryStage.act(delta);
+        mVictoryStage.draw();
 	}
 
 	@Override
 	public void resize(final int width, final int height) {
-		super.resize(width, height);
+		mStage.setViewport(width, height, true);
 		
         mStage.clear();
         mTokens.clear();
@@ -260,6 +276,9 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 
 	@Override
 	public void dispose() {
+		mBatch.dispose();
+		mStage.dispose();
+		mVictoryStage.dispose();
 		mFont.dispose();
 		mBorder.dispose();
 		mBackground.dispose();
@@ -279,8 +298,6 @@ public abstract class LevelScreen extends AbstractScreen implements InputProcess
 		for (final Texture t : mGoldTokens) {
 			t.dispose();
 		}
-		
-		super.dispose();
 	}
 
 	@Override
