@@ -28,7 +28,7 @@ import com.voyagegames.monkeymatch.helpers.StaticGridImage;
 import com.voyagegames.monkeymatch.helpers.Token;
 import com.voyagegames.monkeymatch.helpers.TokenDrag;
 
-public abstract class LevelScreen implements Screen, InputProcessor {
+public class LevelScreen implements Screen, InputProcessor {
 	
 	private static final int BONUS_SCORE = 5;
 	private static final float TOKEN_SPACING = 1.5f;
@@ -40,11 +40,12 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 	private static final float TIME_4 = 1f;
 	private static final float TIME_5 = 1.25f;
 
-	private Random mRandomGenerator = new Random();
+	private final Random mRandomGenerator = new Random();
 	
 	private final SpriteBatch mBatch;
 	private final Stage       mStage;
 	private final LevelLoader mLevel;
+	private final LevelCallback mCallback;
 	
     private final boolean[] mGridInUse;
     private final boolean[] mGridCollected;
@@ -79,12 +80,14 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 	private int mPointsScore;
     private StaticGridImage mGridBackgroundImage;
 
-	public LevelScreen(final String levelXML) throws Exception {
+	public LevelScreen(final String levelXML, final int score, final LevelCallback callback) throws Exception {
 		super();
 		
 		mBatch = new SpriteBatch();
 		mStage = new Stage(0, 0, true);
 		mLevel = new LevelLoader(levelXML);
+		mPointsScore = score;
+		mCallback = callback;
 		
 		mTargetSpawnTime = mLevel.spawnTime;
 		mGridElements = mLevel.numRows * mLevel.numCols;
@@ -537,10 +540,26 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 					@Override
 					public boolean act(float delta) {
 						for (final Actor a : mStage.getActors()) {
-							a.addAction(Actions.sequence(
-									Actions.fadeOut(TIME_4),
-									Actions.removeActor()
-								));
+							if (a == mPointsActor) {
+								a.addAction(Actions.sequence(
+										Actions.fadeOut(TIME_4),
+										new Action() {
+
+											@Override
+											public boolean act(final float delta) {
+												mCallback.levelComplete(mPointsScore);
+												return true;
+											}
+											
+										},
+										Actions.removeActor()
+									));
+							} else {
+								a.addAction(Actions.sequence(
+										Actions.fadeOut(TIME_4),
+										Actions.removeActor()
+									));
+							}
 						}
 						
 						return true;
@@ -677,6 +696,58 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 		}
 		
 		return closestTarget;
+	}
+	
+	//
+	// Just a bunch of unused required implementation stubs below...
+	//
+
+	@Override
+	public void resume() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void pause() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void hide() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean keyDown(final int keyCode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyTyped(final char character) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyUp(final int keyCode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(final int x, final int y) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean scrolled(final int amount) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
