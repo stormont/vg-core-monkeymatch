@@ -486,9 +486,13 @@ public abstract class LevelScreen implements Screen, InputProcessor {
 
 			addScore(BONUS_SCORE);
 		}
-		
+
         final Actor actor = new Image(new TextureRegion(mTrophy));
         
+        actor.setScale(mScale);
+        actor.setPosition(
+        		(mStage.getWidth() - (actor.getWidth() * mScale)) / 2f,
+        		(mStage.getHeight() - (actor.getHeight() * mScale)) / 2f);
         actor.addAction(Actions.sequence(
         		Actions.delay(TIME_2 * mBonuses.size()),
         		Actions.fadeIn(TIME_2),
