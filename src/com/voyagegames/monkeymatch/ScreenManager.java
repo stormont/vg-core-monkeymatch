@@ -70,9 +70,11 @@ public class ScreenManager extends Game implements LevelCallback {
 		mLevelCount++;
         
         try {
+    		Gdx.input.setInputProcessor(null);
+    		
         	if (mScreen != null) {
+        		mScreen.pause();
         		mScreen.dispose();
-        		mScreen = null;
         	}
         	
         	switch (mLevelCount) {

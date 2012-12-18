@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -42,9 +41,8 @@ public class LevelScreen implements Screen, InputProcessor {
 
 	private final Random mRandomGenerator = new Random();
 	
-	private final SpriteBatch mBatch;
-	private final Stage       mStage;
-	private final LevelLoader mLevel;
+	private final Stage         mStage;
+	private final LevelLoader   mLevel;
 	private final LevelCallback mCallback;
 	
     private final boolean[] mGridInUse;
@@ -64,6 +62,7 @@ public class LevelScreen implements Screen, InputProcessor {
 	private final List<Actor> mScoreDigits = new ArrayList<Actor>();
 	
 	private boolean mVictory;
+	private boolean mVictoryDone;
 	private float mScale;
 	private float mTargetSpawnTime;
 	private float mLastTargetTime;
@@ -83,7 +82,6 @@ public class LevelScreen implements Screen, InputProcessor {
 	public LevelScreen(final String levelXML, final int score, final LevelCallback callback) throws Exception {
 		super();
 		
-		mBatch = new SpriteBatch();
 		mStage = new Stage(0, 0, true);
 		mLevel = new LevelLoader(levelXML);
 		mPointsScore = score;
@@ -155,6 +153,12 @@ public class LevelScreen implements Screen, InputProcessor {
 
 	@Override
 	public void render(final float delta) {
+		synchronized (mCallback) {
+			if (mVictoryDone) {
+				return;
+			}
+		}
+		
         update(delta);
         
     	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
@@ -175,8 +179,6 @@ public class LevelScreen implements Screen, InputProcessor {
         	mGridInUse[i] = false;
         	mGridCollected[i] = false;
         }
-        
-        mPointsScore = 0;
         
         mGridBackgroundImage = new StaticGridImage(mGridBackground, width, height);
         mScale = width < height ?
@@ -277,7 +279,6 @@ public class LevelScreen implements Screen, InputProcessor {
 
 	@Override
 	public void dispose() {
-		mBatch.dispose();
 		mStage.dispose();
 		mBorder.dispose();
 		mBackground.dispose();
@@ -540,32 +541,35 @@ public class LevelScreen implements Screen, InputProcessor {
 					@Override
 					public boolean act(float delta) {
 						for (final Actor a : mStage.getActors()) {
-							if (a == mPointsActor) {
-								a.addAction(Actions.sequence(
-										Actions.fadeOut(TIME_4),
-										new Action() {
-
-											@Override
-											public boolean act(final float delta) {
-												mCallback.levelComplete(mPointsScore);
-												return true;
-											}
-											
-										},
-										Actions.removeActor()
-									));
-							} else {
-								a.addAction(Actions.sequence(
-										Actions.fadeOut(TIME_4),
-										Actions.removeActor()
-									));
+							if (a == actor) {
+								continue;
 							}
+							
+							a.addAction(Actions.sequence(
+									Actions.fadeOut(TIME_4),
+									Actions.removeActor()
+								));
 						}
 						
 						return true;
 					}
 					
-        		}
+        		},
+        		Actions.fadeOut(TIME_4),
+        		new Action() {
+
+					@Override
+					public boolean act(final float delta) {
+						synchronized (mCallback) {
+							mVictoryDone = true;
+						}
+						
+						mCallback.levelComplete(mPointsScore);
+						return true;
+					}
+        			
+        		},
+        		Actions.removeActor()
         	));
 		actor.getColor().a = 0f;
 		actor.setTouchable(Touchable.disabled);

@@ -13,13 +13,13 @@
 	<tokens>
 	    <tokenasset>
 	    	<asset>monkey.png</asset>
-	    	<topweight>0.8f</topweight>
+	    	<topweight>0.62f</topweight>
 	    	<value>1</value>
 	    </tokenasset>
 	    <tokenasset>
 	    	<asset>bananas.png</asset>
 	    	<topweight>1f</topweight>
-	    	<value>4</value>
+	    	<value>2</value>
 	    </tokenasset>
 	</tokens>
 	<grid>
