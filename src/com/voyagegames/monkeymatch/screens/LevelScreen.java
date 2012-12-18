@@ -157,14 +157,14 @@ public class LevelScreen implements Screen, InputProcessor {
 			if (mVictoryDone) {
 				return;
 			}
-		}
 		
-        update(delta);
-        
-    	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
-    	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        mStage.act(delta);
-        mStage.draw();
+	        update(delta);
+	        
+	    	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
+	    	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+	        mStage.act(delta);
+	        mStage.draw();
+		}
 	}
 
 	@Override
