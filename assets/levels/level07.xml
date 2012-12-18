@@ -5,8 +5,8 @@
 		<tokenscale>0.45f</tokenscale>
 		<spawntime>0.9f</spawntime>
 		<bonuses>6</bonuses>
-		<numrows>5</numrows>
-		<numcols>5</numcols>
+		<numrows>7</numrows>
+		<numcols>7</numcols>
         <tokenx>16.6f</tokenx>
         <tokeny>6.6f</tokeny>
 	</global>
