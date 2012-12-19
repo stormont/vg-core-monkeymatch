@@ -9,23 +9,32 @@ import com.voyagegames.monkeymatch.screens.LevelScreen;
 
 public class ScreenManager extends Game implements LevelCallback {
 
-    private FPSLogger mFPSLogger;
+	private final IDataProvider mDataProvider;
+    private final FPSLogger mFPSLogger;
+    
     private LevelScreen mScreen;
     private int mLevelCount;
     private int mTotalScore;
     private boolean mEndGame;
+    
+    public ScreenManager(final IDataProvider dataProvider) {
+    	super();
+    	mDataProvider = dataProvider;
+        mFPSLogger = new FPSLogger();
+    }
 
 	@Override
 	public void create() {
-        mFPSLogger = new FPSLogger();
         levelComplete(0);
 	}
  
     @Override
     public void render() {
-    	if (!mEndGame) {
-    		mFPSLogger.log();
-    		getScreen().render(Gdx.graphics.getDeltaTime());
+    	synchronized (mFPSLogger) {
+	    	if (!mEndGame) {
+	    		mFPSLogger.log();
+	    		getScreen().render(Gdx.graphics.getDeltaTime());
+	    	}
     	}
     }
 
@@ -71,6 +80,10 @@ public class ScreenManager extends Game implements LevelCallback {
 	public void levelComplete(final int score) {
 		mTotalScore = score;
 		mLevelCount++;
+		
+		if (mDataProvider.personalBest() < mTotalScore) {
+			mDataProvider.setPersonalBest(mTotalScore);
+		}
         
         try {
     		Gdx.input.setInputProcessor(null);
@@ -117,7 +130,9 @@ public class ScreenManager extends Game implements LevelCallback {
 	}
 	
 	private void doEndGame() {
-		mEndGame = true;
+    	synchronized (mFPSLogger) {
+    		mEndGame = true;
+    	}
 	}
 
 }
