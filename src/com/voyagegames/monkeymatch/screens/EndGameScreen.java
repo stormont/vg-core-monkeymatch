@@ -20,9 +20,11 @@ import com.voyagegames.monkeymatch.helpers.StaticGridImage;
 public class EndGameScreen implements Screen, InputProcessor {
 
 	private static final float TROPHY_SCALE = 0.5f;
+	private static final float ROTATE_ANGLE =30f;
 	private static final float TIME_0 = 0f;
 	private static final float TIME_1 = 0.25f;
 	private static final float TIME_2 = 0.5f;
+	private static final float TIME_3 = 0.75f;
 	private static final float TIME_4 = 1f;
 
 	private final Stage         mStage;
@@ -128,6 +130,20 @@ public class EndGameScreen implements Screen, InputProcessor {
         
         setPersonalBestScore(scale);
         setCurrentScore(scale);
+        
+        mButtonActor = new Image(new TextureRegion(mMonkey));
+        
+        final float buttonWidth = mButtonActor.getWidth() * scale;
+        final float buttonHeight = mButtonActor.getHeight() * scale;
+        
+        mButtonActor.setPosition((width - buttonWidth) / 2f, gridBorder.image.getY());
+        mButtonActor.setOrigin(buttonWidth / 2f, buttonHeight / 2f);
+        setupActor(mButtonActor, TIME_4, TIME_1, scale);
+        mButtonActor.addAction(Actions.rotateTo(ROTATE_ANGLE));
+        mButtonActor.addAction(Actions.forever(Actions.sequence(
+        		Actions.rotateTo(-ROTATE_ANGLE, TIME_3),
+        		Actions.rotateTo(ROTATE_ANGLE, TIME_3)
+        	)));
 	}
 	
 	@Override
@@ -208,7 +224,7 @@ public class EndGameScreen implements Screen, InputProcessor {
 			return;
 		}
 		
-        final String scoreStr = String.valueOf(1000);
+        final String scoreStr = String.valueOf(mScore);
         final int length = scoreStr.length();
         
         final float trophyScale = scale * TROPHY_SCALE;
@@ -238,12 +254,12 @@ public class EndGameScreen implements Screen, InputProcessor {
         float offsetX = backgroundX + ((boxWidth - width) / 2f);
         
         bananas.setPosition(offsetX, offsetY);
-        setupActor(bananas, TIME_4, TIME_1, trophyScale);
+        setupActor(bananas, TIME_2, TIME_1, trophyScale);
         offsetX += bananasWidth;
         
         for (final Actor a : digits) {
         	a.setPosition(offsetX, digitOffsetY);
-            setupActor(a, TIME_4, TIME_1, trophyScale);
+            setupActor(a, TIME_2, TIME_1, trophyScale);
         	offsetX += (a.getWidth() * trophyScale);
         }
 	}
