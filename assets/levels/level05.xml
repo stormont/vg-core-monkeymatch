@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <level>
 	<global>
-	    <background>backgrounds/asia/bkgd_asia.png</background>
-		<tokenscale>0.45f</tokenscale>
+	    <background>backgrounds/southamerica/bkgd_southamerica.png</background>
+		<tokenscale>0.3f</tokenscale>
 		<spawntime>1.1f</spawntime>
 		<bonuses>5</bonuses>
 		<numrows>6</numrows>
 		<numcols>6</numcols>
-        <tokenx>16.6f</tokenx>
-        <tokeny>6.6f</tokeny>
+        <tokenx>21.6f</tokenx>
+        <tokeny>9.6f</tokeny>
 	</global>
 	<tokens>
 	    <tokenasset>
@@ -34,128 +34,183 @@
 	</tokens>
 	<grid>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_1_1.png</asset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_1_1.png</asset>
 	        <xoffset>0f</xoffset>
-	        <yoffset>352f</yoffset>
+	        <yoffset>367f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_1_2.png</asset>
-	        <xoffset>117f</xoffset>
-	        <yoffset>352f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_1_2.png</asset>
+	        <xoffset>97f</xoffset>
+	        <yoffset>367f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_1_3.png</asset>
-	        <xoffset>234f</xoffset>
-	        <yoffset>352f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_1_3.png</asset>
+	        <xoffset>194f</xoffset>
+	        <yoffset>367f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_1_4.png</asset>
-	        <xoffset>351f</xoffset>
-	        <yoffset>352f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_1_4.png</asset>
+	        <xoffset>291f</xoffset>
+	        <yoffset>367f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_1_5.png</asset>
-	        <xoffset>468f</xoffset>
-	        <yoffset>352f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_1_5.png</asset>
+	        <xoffset>388f</xoffset>
+	        <yoffset>367f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_2_1.png</asset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_1_6.png</asset>
+	        <xoffset>485f</xoffset>
+	        <yoffset>367f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_2_1.png</asset>
 	        <xoffset>0f</xoffset>
-	        <yoffset>264f</yoffset>
+	        <yoffset>294f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_2_2.png</asset>
-	        <xoffset>117f</xoffset>
-	        <yoffset>264f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_2_2.png</asset>
+	        <xoffset>97f</xoffset>
+	        <yoffset>294f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_2_3.png</asset>
-	        <xoffset>234f</xoffset>
-	        <yoffset>264f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_2_3.png</asset>
+	        <xoffset>194f</xoffset>
+	        <yoffset>294f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_2_4.png</asset>
-	        <xoffset>351f</xoffset>
-	        <yoffset>264f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_2_4.png</asset>
+	        <xoffset>291f</xoffset>
+	        <yoffset>294f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_2_5.png</asset>
-	        <xoffset>468f</xoffset>
-	        <yoffset>264f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_2_5.png</asset>
+	        <xoffset>388f</xoffset>
+	        <yoffset>294f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_3_1.png</asset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_2_6.png</asset>
+	        <xoffset>485f</xoffset>
+	        <yoffset>294f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_3_1.png</asset>
 	        <xoffset>0f</xoffset>
-	        <yoffset>176f</yoffset>
+	        <yoffset>221f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_3_2.png</asset>
-	        <xoffset>117f</xoffset>
-	        <yoffset>176f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_3_2.png</asset>
+	        <xoffset>97f</xoffset>
+	        <yoffset>221f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_3_3.png</asset>
-	        <xoffset>234f</xoffset>
-	        <yoffset>176f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_3_3.png</asset>
+	        <xoffset>194f</xoffset>
+	        <yoffset>221f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_3_4.png</asset>
-	        <xoffset>351f</xoffset>
-	        <yoffset>176f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_3_4.png</asset>
+	        <xoffset>291f</xoffset>
+	        <yoffset>221f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_3_5.png</asset>
-	        <xoffset>468f</xoffset>
-	        <yoffset>176f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_3_5.png</asset>
+	        <xoffset>388f</xoffset>
+	        <yoffset>221f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_4_1.png</asset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_3_6.png</asset>
+	        <xoffset>485f</xoffset>
+	        <yoffset>221f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_4_1.png</asset>
 	        <xoffset>0f</xoffset>
-	        <yoffset>88f</yoffset>
+	        <yoffset>148f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_4_2.png</asset>
-	        <xoffset>117f</xoffset>
-	        <yoffset>88f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_4_2.png</asset>
+	        <xoffset>97f</xoffset>
+	        <yoffset>148f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_4_3.png</asset>
-	        <xoffset>234f</xoffset>
-	        <yoffset>88f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_4_3.png</asset>
+	        <xoffset>194f</xoffset>
+	        <yoffset>148f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_4_4.png</asset>
-	        <xoffset>351f</xoffset>
-	        <yoffset>88f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_4_4.png</asset>
+	        <xoffset>291f</xoffset>
+	        <yoffset>148f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_4_5.png</asset>
-	        <xoffset>468f</xoffset>
-	        <yoffset>88f</yoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_4_5.png</asset>
+	        <xoffset>388f</xoffset>
+	        <yoffset>148f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_5_1.png</asset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_4_6.png</asset>
+	        <xoffset>485f</xoffset>
+	        <yoffset>148f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_5_1.png</asset>
+	        <xoffset>0f</xoffset>
+	        <yoffset>75f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_5_2.png</asset>
+	        <xoffset>97f</xoffset>
+	        <yoffset>75f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_5_3.png</asset>
+	        <xoffset>194f</xoffset>
+	        <yoffset>75f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_5_4.png</asset>
+	        <xoffset>291f</xoffset>
+	        <yoffset>75f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_5_5.png</asset>
+	        <xoffset>388f</xoffset>
+	        <yoffset>75f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_5_6.png</asset>
+	        <xoffset>485f</xoffset>
+	        <yoffset>75f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_6_1.png</asset>
 	        <xoffset>0f</xoffset>
 	        <yoffset>0f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_5_2.png</asset>
-	        <xoffset>117f</xoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_6_2.png</asset>
+	        <xoffset>97f</xoffset>
 	        <yoffset>0f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_5_3.png</asset>
-	        <xoffset>234f</xoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_6_3.png</asset>
+	        <xoffset>194f</xoffset>
 	        <yoffset>0f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_5_4.png</asset>
-	        <xoffset>351f</xoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_6_4.png</asset>
+	        <xoffset>291f</xoffset>
 	        <yoffset>0f</yoffset>
 	    </gridelement>
 	    <gridelement>
-	        <asset>backgrounds/asia/bkgd_asia_5_5.png</asset>
-	        <xoffset>468f</xoffset>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_6_5.png</asset>
+	        <xoffset>388f</xoffset>
+	        <yoffset>0f</yoffset>
+	    </gridelement>
+	    <gridelement>
+	        <asset>backgrounds/southamerica/bkgd_southamerica_6_6.png</asset>
+	        <xoffset>485f</xoffset>
 	        <yoffset>0f</yoffset>
 	    </gridelement>
 	</grid>
