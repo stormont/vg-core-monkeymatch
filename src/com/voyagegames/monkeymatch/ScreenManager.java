@@ -13,6 +13,7 @@ public class ScreenManager extends Game implements LevelCallback {
     private LevelScreen mScreen;
     private int mLevelCount;
     private int mTotalScore;
+    private boolean mEndGame;
 
 	@Override
 	public void create() {
@@ -22,8 +23,10 @@ public class ScreenManager extends Game implements LevelCallback {
  
     @Override
     public void render() {
-        mFPSLogger.log();
-        getScreen().render(Gdx.graphics.getDeltaTime());
+    	if (!mEndGame) {
+    		mFPSLogger.log();
+    		getScreen().render(Gdx.graphics.getDeltaTime());
+    	}
     }
 
 	@Override
@@ -114,7 +117,7 @@ public class ScreenManager extends Game implements LevelCallback {
 	}
 	
 	private void doEndGame() {
-		// TODO
+		mEndGame = true;
 	}
 
 }

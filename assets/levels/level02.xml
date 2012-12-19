@@ -2,7 +2,7 @@
 <level>
 	<global>
 	    <background>backgrounds/europe/bkgd_europe.png</background>
-		<tokenscale>0.45f</tokenscale>
+		<tokenscale>0.6f</tokenscale>
 		<spawntime>1.4f</spawntime>
 		<bonuses>3</bonuses>
 		<numrows>4</numrows>

@@ -2,7 +2,7 @@
 <level>
 	<global>
 	    <background>backgrounds/africa/bkgd_africa.png</background>
-		<tokenscale>0.45f</tokenscale>
+		<tokenscale>0.6f</tokenscale>
 		<spawntime>1.5f</spawntime>
 		<bonuses>3</bonuses>
 		<numrows>4</numrows>

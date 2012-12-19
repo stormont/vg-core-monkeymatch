@@ -2,7 +2,7 @@
 <level>
 	<global>
 	    <background>backgrounds/australia/bkgd_australia.png</background>
-		<tokenscale>0.36f</tokenscale>
+		<tokenscale>0.48f</tokenscale>
 		<spawntime>1.3f</spawntime>
 		<bonuses>4</bonuses>
 		<numrows>5</numrows>

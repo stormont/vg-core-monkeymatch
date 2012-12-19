@@ -2,7 +2,7 @@
 <level>
 	<global>
 	    <background>backgrounds/southamerica/bkgd_southamerica.png</background>
-		<tokenscale>0.3f</tokenscale>
+		<tokenscale>0.4f</tokenscale>
 		<spawntime>1.1f</spawntime>
 		<bonuses>5</bonuses>
 		<numrows>6</numrows>

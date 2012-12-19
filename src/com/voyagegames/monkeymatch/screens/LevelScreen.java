@@ -30,6 +30,9 @@ import com.voyagegames.monkeymatch.helpers.TokenDrag;
 public class LevelScreen implements Screen, InputProcessor {
 	
 	private static final int BONUS_SCORE = 5;
+	private static final float BASE_SCALE = 0.6f;
+	private static final float POINTS_OFFSET = 1.25f;
+	private static final float STANDARD_SCALING = 0.45f;
 	private static final float TOKEN_SPACING = 1.5f;
 	private static final float ROTATE_ANGLE = 10f;
 	private static final float TIME_0 = 0f;
@@ -230,7 +233,9 @@ public class LevelScreen implements Screen, InputProcessor {
         	final Texture t = mTokenTextures[i];
             final Image image = new Image(new TextureRegion(t));
             final float imageWidth = image.getWidth() * tokenScale;
-            final Vector2 initialPosition = new Vector2(offset + (imageWidth / 2f * mLevel.tokenScale), 0f);
+            final Vector2 initialPosition = new Vector2(
+            		offset + (imageWidth / 2f * mLevel.tokenScale),
+            		(BASE_SCALE - mLevel.tokenScale) * image.getHeight() * tokenScale);
             final Image highlightImage = new Image(highlight);
             
             highlightImage.setPosition(initialPosition.x, initialPosition.y);
@@ -246,22 +251,26 @@ public class LevelScreen implements Screen, InputProcessor {
             offset += imageWidth * TOKEN_SPACING;
         }
         
+        final float standardScale = mScale * STANDARD_SCALING;
+        
         mPointsActor = new Image(new TextureRegion(mPoints));
-        mPointsActor.setPosition(width - (mPointsActor.getWidth() * tokenScale), height - (mPointsActor.getHeight() * tokenScale));
-        setupActor(mPointsActor, TIME_2, TIME_2, tokenScale);
+        mPointsActor.setPosition(
+        		width - (mPointsActor.getWidth() * standardScale * POINTS_OFFSET),
+        		height - (mPointsActor.getHeight() * standardScale * POINTS_OFFSET));
+        setupActor(mPointsActor, TIME_2, TIME_2, standardScale);
 		
         for (int i = 0; i < mLevel.numBonuses; ++i) {
         	final Actor actor = new Image(new TextureRegion(mBonus));
-        	final float halfActorWidth = actor.getWidth() * 0.5f * tokenScale;
-        	final float halfActorHeight = actor.getHeight() * 0.5f * tokenScale;
+        	final float halfActorWidth = actor.getWidth() * 0.5f * standardScale;
+        	final float halfActorHeight = actor.getHeight() * 0.5f * standardScale;
         	
         	actor.setOrigin(
         			halfActorWidth,
         			halfActorHeight);
         	actor.setPosition(
-        			((float)i) * halfActorWidth - halfActorWidth,
-        			-(halfActorHeight * 0.5f) + height - (halfActorHeight * 2f));
-            setupActor(actor, TIME_2, TIME_2, tokenScale);
+        			((float)i) * halfActorWidth - (halfActorWidth / 2f),
+        			height - (halfActorHeight * 2.75f));
+            setupActor(actor, TIME_2, TIME_2, standardScale);
             actor.addAction(Actions.sequence(
             			Actions.delay(TIME_3),
             			Actions.forever(
@@ -436,13 +445,18 @@ public class LevelScreen implements Screen, InputProcessor {
 	
 	private void updateScore() {
         final String score = String.valueOf(mPointsScore);
-        final float scale = mLevel.tokenScale * mScale;
+        final float scale = STANDARD_SCALING * mScale;
         final int length = score.length();
         
         for (final Actor a : mScoreDigits) {
         	a.clearActions();
         	a.addAction(Actions.removeActor());
         }
+        
+        final float stageWidth = mStage.getWidth();
+        final float pointsWidth = mPointsActor.getWidth() * scale * POINTS_OFFSET;
+        final float pointsHeight = mPointsActor.getHeight();
+        final float pointsY = mPointsActor.getY();
         
         float width = 0f;
         
@@ -453,8 +467,8 @@ public class LevelScreen implements Screen, InputProcessor {
         	a.setScale(scale);
         	width += (a.getWidth() * scale);
         	a.setPosition(
-        			mStage.getWidth() - width - (mPointsActor.getWidth() * scale),
-        			mPointsActor.getY() + ((mPointsActor.getHeight() - a.getHeight()) * scale / 2f));
+        			stageWidth - pointsWidth - width,
+        			pointsY + ((pointsHeight - a.getHeight()) * scale / 2f));
         	mStage.addActor(a);
         	mScoreDigits.add(a);
         }

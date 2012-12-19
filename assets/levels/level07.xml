@@ -2,7 +2,7 @@
 <level>
 	<global>
 	    <background>backgrounds/antarctica/bkgd_antarctica.png</background>
-		<tokenscale>0.26f</tokenscale>
+		<tokenscale>0.35f</tokenscale>
 		<spawntime>0.9f</spawntime>
 		<bonuses>6</bonuses>
 		<numrows>7</numrows>
