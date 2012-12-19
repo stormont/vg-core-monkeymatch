@@ -83,8 +83,6 @@ public class LevelScreen implements Screen, InputProcessor {
     private StaticGridImage mGridBackgroundImage;
 
 	public LevelScreen(final String levelXML, final int score, final LevelCallback callback) throws Exception {
-		super();
-		
 		mStage = new Stage(0, 0, true);
 		mLevel = new LevelLoader(levelXML);
 		mPointsScore = score;

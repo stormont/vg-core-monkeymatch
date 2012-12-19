@@ -2,20 +2,23 @@ package com.voyagegames.monkeymatch;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.FPSLogger;
+import com.voyagegames.monkeymatch.screens.EndGameScreen;
 import com.voyagegames.monkeymatch.screens.LevelCallback;
 import com.voyagegames.monkeymatch.screens.LevelScreen;
 
 public class ScreenManager extends Game implements LevelCallback {
+	
+	private static final int MAX_LEVELS = 8;
 
 	private final IDataProvider mDataProvider;
     private final FPSLogger mFPSLogger;
     
-    private LevelScreen mScreen;
+    private Screen mScreen;
     private int mLevelCount;
     private int mTotalScore;
-    private boolean mEndGame;
     
     public ScreenManager(final IDataProvider dataProvider) {
     	super();
@@ -25,17 +28,18 @@ public class ScreenManager extends Game implements LevelCallback {
 
 	@Override
 	public void create() {
+        mLevelCount = MAX_LEVELS - 1;
         levelComplete(0);
 	}
  
     @Override
     public void render() {
-    	synchronized (mFPSLogger) {
-	    	if (!mEndGame) {
-	    		mFPSLogger.log();
-	    		getScreen().render(Gdx.graphics.getDeltaTime());
-	    	}
-    	}
+		final Screen screen = getScreen();
+		
+		if (screen != null) {
+			mFPSLogger.log();
+			screen.render(Gdx.graphics.getDeltaTime());
+		}
     }
 
 	@Override
@@ -79,7 +83,7 @@ public class ScreenManager extends Game implements LevelCallback {
 	@Override
 	public void levelComplete(final int score) {
 		mTotalScore = score;
-		mLevelCount++;
+		mLevelCount = (mLevelCount + 1) % MAX_LEVELS;
 		
 		if (mDataProvider.personalBest() < mTotalScore) {
 			mDataProvider.setPersonalBest(mTotalScore);
@@ -94,6 +98,9 @@ public class ScreenManager extends Game implements LevelCallback {
         	}
         	
         	switch (mLevelCount) {
+        	case 0:
+        		mScreen = new EndGameScreen(this, mTotalScore, mDataProvider.personalBest());
+        		break;
         	case 1:
             	mScreen = new LevelScreen("assets/levels/level01.xml", mTotalScore, this);
         		break;
@@ -115,24 +122,15 @@ public class ScreenManager extends Game implements LevelCallback {
         	case 7:
             	mScreen = new LevelScreen("assets/levels/level07.xml", mTotalScore, this);
         		break;
-        	case 8:
-        		doEndGame();
-        		return;
         	}
         	
             setScreen(mScreen);
-    		Gdx.input.setInputProcessor(mScreen);
+    		Gdx.input.setInputProcessor((InputProcessor)mScreen);
         } catch (final Exception e) {
         	System.out.println(e.toString());
         	e.printStackTrace();
         	dispose();
         }
-	}
-	
-	private void doEndGame() {
-    	synchronized (mFPSLogger) {
-    		mEndGame = true;
-    	}
 	}
 
 }
