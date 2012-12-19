@@ -23,7 +23,6 @@ public class EndGameScreen implements Screen, InputProcessor {
 	private static final float ROTATE_ANGLE =30f;
 	private static final float TIME_0 = 0f;
 	private static final float TIME_1 = 0.25f;
-	private static final float TIME_2 = 0.5f;
 	private static final float TIME_3 = 0.75f;
 	private static final float TIME_4 = 1f;
 
@@ -42,6 +41,7 @@ public class EndGameScreen implements Screen, InputProcessor {
     
     private StaticGridImage mBackgroundActor;
 	private Actor mButtonActor;
+	private boolean mIsTouched;
 	
 	public EndGameScreen(final LevelCallback callback, final int score, final int personalBest) {
 		mStage = new Stage(0, 0, true);
@@ -139,18 +139,39 @@ public class EndGameScreen implements Screen, InputProcessor {
         mButtonActor.setPosition((width - buttonWidth) / 2f, gridBorder.image.getY());
         mButtonActor.setOrigin(buttonWidth / 2f, buttonHeight / 2f);
         setupActor(mButtonActor, TIME_4, TIME_1, scale);
+        mButtonActor.addAction(Actions.touchable(Touchable.enabled));
         mButtonActor.addAction(Actions.rotateTo(ROTATE_ANGLE));
         addRotateActions();
 	}
 	
 	@Override
 	public boolean touchDown(final int x, final int y, final int pointer, final int button) {
+		final Actor a = mStage.hit(x, mStage.getHeight() - y, true);
+		
+		if (a != mButtonActor) {
+			return false;
+		}
+
+		mIsTouched = true;
 		mButtonActor.clearActions();
 		return true;
 	}
 
 	@Override
 	public boolean touchUp(final int x, final int y, final int pointer, final int button) {
+		if (!mIsTouched) {
+			return false;
+		}
+		
+		final Actor a = mStage.hit(x, mStage.getHeight() - y, true);
+		
+		if (a == mButtonActor) {
+			mCallback.levelComplete(0);
+			return true;
+		}
+
+		mIsTouched = false;
+		mButtonActor.clearActions();
 		addRotateActions();
 		return true;
 	}
@@ -258,12 +279,12 @@ public class EndGameScreen implements Screen, InputProcessor {
         float offsetX = backgroundX + ((boxWidth - width) / 2f);
         
         bananas.setPosition(offsetX, offsetY);
-        setupActor(bananas, TIME_2, TIME_1, trophyScale);
+        setupActor(bananas, TIME_3, TIME_1, trophyScale);
         offsetX += bananasWidth;
         
         for (final Actor a : digits) {
         	a.setPosition(offsetX, digitOffsetY);
-            setupActor(a, TIME_2, TIME_1, trophyScale);
+            setupActor(a, TIME_3, TIME_1, trophyScale);
         	offsetX += (a.getWidth() * trophyScale);
         }
 	}

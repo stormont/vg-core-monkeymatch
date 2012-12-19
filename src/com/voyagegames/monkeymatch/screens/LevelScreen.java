@@ -420,8 +420,8 @@ public class LevelScreen implements Screen, InputProcessor {
 				Actions.touchable(Touchable.disabled),
 				Actions.fadeOut(TIME_1),
 				Actions.moveTo(token.initialPosition.x, token.initialPosition.y),
-				Actions.fadeIn(TIME_1),
-				Actions.touchable(Touchable.enabled)
+				Actions.touchable(Touchable.enabled),
+				Actions.fadeIn(TIME_1)
 			));
 		
 		for (int i = 0; i < mTokens.size(); ++i) {
