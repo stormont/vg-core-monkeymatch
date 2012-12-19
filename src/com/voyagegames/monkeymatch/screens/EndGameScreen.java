@@ -38,6 +38,7 @@ public class EndGameScreen implements Screen, InputProcessor {
     private Texture mMonkey;
     private Texture mBananas;
     private Texture mTrophy;
+    private Texture mTitle;
     
     private StaticGridImage mBackgroundActor;
 	private Actor mButtonActor;
@@ -57,6 +58,10 @@ public class EndGameScreen implements Screen, InputProcessor {
 		mBorder.dispose();
 		mBackground.dispose();
 		mGridBackground.dispose();
+		mMonkey.dispose();
+		mBananas.dispose();
+		mTrophy.dispose();
+		mTitle.dispose();
 		
 		for (final Texture t : mDigits) {
 			t.dispose();
@@ -92,6 +97,9 @@ public class EndGameScreen implements Screen, InputProcessor {
         
         mTrophy = new Texture("misc/trophy.png");
         mTrophy.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        
+        mTitle = new Texture("misc/title.png");
+        mTitle.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         
         for (int i = 0; i < mDigits.length; ++i) {
         	mDigits[i] = new Texture("misc/digits" + i + ".png");
@@ -130,6 +138,12 @@ public class EndGameScreen implements Screen, InputProcessor {
         
         setPersonalBestScore(scale);
         setCurrentScore(scale);
+        
+        final Actor title = new Image(new TextureRegion(mTitle));
+        title.setPosition(
+        		(width - (title.getWidth() * scale)) / 2f,
+        		(height - (title.getHeight() * scale)));
+        setupActor(title, TIME_0, TIME_1, scale);
         
         mButtonActor = new Image(new TextureRegion(mMonkey));
         
