@@ -140,22 +140,19 @@ public class EndGameScreen implements Screen, InputProcessor {
         mButtonActor.setOrigin(buttonWidth / 2f, buttonHeight / 2f);
         setupActor(mButtonActor, TIME_4, TIME_1, scale);
         mButtonActor.addAction(Actions.rotateTo(ROTATE_ANGLE));
-        mButtonActor.addAction(Actions.forever(Actions.sequence(
-        		Actions.rotateTo(-ROTATE_ANGLE, TIME_3),
-        		Actions.rotateTo(ROTATE_ANGLE, TIME_3)
-        	)));
+        addRotateActions();
 	}
 	
 	@Override
 	public boolean touchDown(final int x, final int y, final int pointer, final int button) {
-		// TODO Auto-generated method stub
-		return false;
+		mButtonActor.clearActions();
+		return true;
 	}
 
 	@Override
 	public boolean touchUp(final int x, final int y, final int pointer, final int button) {
-		// TODO Auto-generated method stub
-		return false;
+		addRotateActions();
+		return true;
 	}
 	
 	private void setupActor(final Actor actor, final float delay, final float fadeIn, final float scale) {
@@ -167,6 +164,13 @@ public class EndGameScreen implements Screen, InputProcessor {
         	));
 		actor.setScale(scale);
         mStage.addActor(actor);
+	}
+	
+	private void addRotateActions() {
+        mButtonActor.addAction(Actions.forever(Actions.sequence(
+        		Actions.rotateTo(-ROTATE_ANGLE, TIME_3),
+        		Actions.rotateTo(ROTATE_ANGLE, TIME_3)
+        	)));
 	}
 	
 	private void setPersonalBestScore(final float scale) {
