@@ -639,7 +639,7 @@ public class LevelScreen implements Screen, InputProcessor {
 		final float tokenWidth = token.actor.getWidth();
 		final float tokenHeight = token.actor.getHeight();
 		final float radius = tokenHeight < tokenWidth ? tokenHeight / 2f : tokenWidth / 2f;
-		final float radiusSq = (radius * radius) * 0.25f;
+		final float radiusSq = radius * radius;
 		final float tokenX = token.actor.getX();
 		final float tokenY = token.actor.getY();
 		
