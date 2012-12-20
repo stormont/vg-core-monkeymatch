@@ -35,6 +35,7 @@ public class LevelScreen implements Screen, InputProcessor {
 	private static final float STANDARD_SCALING = 0.45f;
 	private static final float TOKEN_SPACING = 1.5f;
 	private static final float ROTATE_ANGLE = 10f;
+	private static final float SPAWN_TIME = 3f;
 	private static final float TIME_0 = 0f;
 	private static final float TIME_1 = 0.25f;
 	private static final float TIME_2 = 0.5f;
@@ -482,13 +483,30 @@ public class LevelScreen implements Screen, InputProcessor {
     	final Texture t = mGoldTokens[tokenIndex];
         final float gridX = (mStage.getWidth() - (mGridBackgroundImage.image.getWidth() * mScale)) / 2f;
         final float gridY = (mStage.getHeight() - (mGridBackgroundImage.image.getHeight() * mScale)) / 2f;
-        final Image image = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
+        final Actor actor = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
         final GridElement e = mLevel.grids.get(gridIndex);
+        final Token token = new Token(actor, tokenIndex, null, 0f, 0);
+        final GridBox gridBox = new GridBox(gridIndex, actor, mGridImages[gridIndex].image);
         
-        image.setPosition(((e.x + mLevel.tokenX) * mScale) + gridX, ((e.y + mLevel.tokenY) * mScale) + gridY);
-        setupActor(image, 2f, 0.5f, mLevel.tokenScale * mScale);
-        mTargets.add(new Token(image, tokenIndex, null, 0f, 0));
-        mGridBoxes.add(new GridBox(gridIndex, image, mGridImages[gridIndex].image));
+        mTargets.add(token);
+        mGridBoxes.add(gridBox);
+        
+        actor.setPosition(((e.x + mLevel.tokenX) * mScale) + gridX, ((e.y + mLevel.tokenY) * mScale) + gridY);
+        setupActor(actor, 2f, 0.5f, mLevel.tokenScale * mScale);
+        actor.addAction(Actions.sequence(
+        		Actions.delay(SPAWN_TIME * mLevel.spawnTime),
+        		Actions.fadeOut(TIME_4),
+        		new Action() {
+					@Override
+					public boolean act(final float delta) {
+						mTargets.remove(token);
+						mGridBoxes.remove(gridBox);
+						mGridInUse[gridIndex] = false;
+						return true;
+					}
+        		},
+        		Actions.removeActor()
+        	));
 	}
 	
 	private void update(final float delta) {
