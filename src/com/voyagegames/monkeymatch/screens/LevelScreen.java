@@ -24,6 +24,7 @@ import com.voyagegames.monkeymatch.helpers.GridBox;
 import com.voyagegames.monkeymatch.helpers.GridElement;
 import com.voyagegames.monkeymatch.helpers.LevelLoader;
 import com.voyagegames.monkeymatch.helpers.StaticGridImage;
+import com.voyagegames.monkeymatch.helpers.TextureManager;
 import com.voyagegames.monkeymatch.helpers.Token;
 import com.voyagegames.monkeymatch.helpers.TokenDrag;
 
@@ -48,14 +49,11 @@ public class LevelScreen implements Screen, InputProcessor {
 	private final Stage         mStage;
 	private final LevelLoader   mLevel;
 	private final LevelCallback mCallback;
+	private final TextureManager mManager;
 	
     private final boolean[] mGridInUse;
     private final boolean[] mGridCollected;
     private final DynamicGridImage[] mGridImages;
-    private final Texture[] mGrids;
-    private final Texture[] mTokenTextures;
-    private final Texture[] mGoldTokens;
-    private final Texture[] mDigits;
 	private final Actor[] mHighlights;
 	private final int mGridElements;
 	
@@ -72,84 +70,46 @@ public class LevelScreen implements Screen, InputProcessor {
 	private float mLastTargetTime;
     private float mElapsedTime;
     private TokenDrag mDrag;
-    private Texture mBackground;
-    private Texture mBorder;
-    private Texture mGridBackground;
-    private Texture mHighlight;
-    private Texture mBonus;
-    private Texture mPoints;
-    private Texture mTrophy;
 	private Actor mPointsActor;
 	private int mPointsScore;
     private StaticGridImage mGridBackgroundImage;
 
-	public LevelScreen(final String levelXML, final int score, final LevelCallback callback) throws Exception {
+	public LevelScreen(
+			final String levelXML,
+			final int score,
+			final LevelCallback callback,
+			final TextureManager manager) throws Exception {
 		mStage = new Stage(0, 0, true);
 		mLevel = new LevelLoader(levelXML);
 		mPointsScore = score;
 		mCallback = callback;
+		mManager = manager;
 		
 		mTargetSpawnTime = mLevel.spawnTime;
 		mGridElements = mLevel.numRows * mLevel.numCols;
 		mGridInUse = new boolean[mGridElements];
 		mGridCollected = new boolean[mGridElements];
 		mGridImages = new DynamicGridImage[mGridElements];
-		mGrids = new Texture[mGridElements];
-		mDigits = new Texture[10];
-		
-		final int tokenLength = mLevel.tokens.size();
-		
-		mTokenTextures = new Texture[tokenLength];
-		mGoldTokens = new Texture[tokenLength];
-		mHighlights = new Actor[tokenLength];
+		mHighlights = new Actor[mLevel.tokens.size()];
 	}
 
 	@Override
 	public void show() {
         mElapsedTime = 0f;
         
-        mBackground = new Texture("backgrounds/bkgd_tutorial.png");
-        mBackground.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        mBorder = new Texture("backgrounds/bkgd_border.png");
-        mBorder.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        mGridBackground = new Texture(mLevel.background);
-        mGridBackground.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        mHighlight = new Texture("tokens/highlight.png");
-        mHighlight.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        mBonus = new Texture("tokens/banana.png");
-        mBonus.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        mPoints = new Texture("tokens/bananas.png");
-        mPoints.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        mTrophy = new Texture("misc/trophy.png");
-        mTrophy.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        mManager.gridBackground = new Texture(mLevel.background);
+        mManager.gridBackground.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         
         for (int i = 0; i < mLevel.grids.size(); ++i) {
-        	mGrids[i] = new Texture(mLevel.grids.get(i).asset);
-        }
-        
-        for (final Texture t : mGrids) {
-        	t.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        }
-        
-        for (int i = 0; i < mDigits.length; ++i) {
-        	mDigits[i] = new Texture("misc/digits" + i + ".png");
-        }
-        
-        for (final Texture t : mDigits) {
-        	t.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        	mManager.grids[i] = new Texture(mLevel.grids.get(i).asset);
+        	mManager.grids[i].setFilter(TextureFilter.Linear, TextureFilter.Linear);
         }
 
         for (int i = 0; i < mLevel.tokens.size(); ++i) {
-        	mTokenTextures[i] = new Texture("tokens/" + mLevel.tokens.get(i));
-        	mGoldTokens[i] = new Texture("tokens/gold" + mLevel.tokens.get(i));
-        	mTokenTextures[i].setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        	mGoldTokens[i].setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        	mManager.tokens[i] = new Texture("tokens/" + mLevel.tokens.get(i));
+        	mManager.goldTokens[i] = new Texture("tokens/gold" + mLevel.tokens.get(i));
+        	mManager.tokens[i].setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        	mManager.goldTokens[i].setFilter(TextureFilter.Linear, TextureFilter.Linear);
         }
 	}
 
@@ -182,14 +142,14 @@ public class LevelScreen implements Screen, InputProcessor {
         	mGridCollected[i] = false;
         }
         
-        mGridBackgroundImage = new StaticGridImage(mGridBackground, width, height);
+        mGridBackgroundImage = new StaticGridImage(mManager.gridBackground, width, height);
         mScale = width < height ?
-        		((float)width) / ((float)mBackground.getWidth()) :
-        		((float)height) / ((float)mBackground.getHeight());
+        		((float)width) / ((float)mManager.background.getWidth()) :
+        		((float)height) / ((float)mManager.background.getHeight());
 
         final float gridX = (width - (mGridBackgroundImage.image.getWidth() * mScale)) / 2f;
         final float gridY = (height - (mGridBackgroundImage.image.getHeight() * mScale)) / 2f;
-        final StaticGridImage background = new StaticGridImage(mBackground, width, height);
+        final StaticGridImage background = new StaticGridImage(mManager.background, width, height);
         
         background.image.setPosition(0f, 0f);
         background.image.setWidth(width);
@@ -201,7 +161,7 @@ public class LevelScreen implements Screen, InputProcessor {
 
         for (int i = 0; i < mGridElements; ++i) {
         	mGridImages[i] = new DynamicGridImage(
-    				mGrids[i],
+        			mManager.grids[i],
     				gridX,
     				gridY,
     				mLevel.grids.get(i).x * mScale,
@@ -209,9 +169,9 @@ public class LevelScreen implements Screen, InputProcessor {
             setupActor(mGridImages[i].image, TIME_5, TIME_2, mScale);
         }
 
-        final StaticGridImage gridBorder = new StaticGridImage(mBorder, width, height);
-        final float borderX = ((float)(mBorder.getWidth() - mGridBackground.getWidth())) / 2f;
-        final float borderY = ((float)(mBorder.getHeight() - mGridBackground.getHeight())) / 2f;
+        final StaticGridImage gridBorder = new StaticGridImage(mManager.border, width, height);
+        final float borderX = ((float)(mManager.border.getWidth() - mManager.gridBackground.getWidth())) / 2f;
+        final float borderY = ((float)(mManager.border.getHeight() - mManager.gridBackground.getHeight())) / 2f;
         
         gridBorder.image.setPosition(gridX - (borderX * mScale), gridY - (borderY * mScale));
         setupActor(gridBorder.image, TIME_0, TIME_1, mScale);
@@ -219,17 +179,26 @@ public class LevelScreen implements Screen, InputProcessor {
         final float tokenScale = mLevel.tokenScale * mScale;
         float totalTokenWidth = 0f;
         
-        for (final Texture t : mTokenTextures) {
+        for (final Texture t : mManager.tokens) {
+        	if (t == null) {
+        		break;
+        	}
+        	
         	final float tokenWidth = t.getWidth();
         	totalTokenWidth += tokenWidth * tokenScale * TOKEN_SPACING;
         }
 
         float offset = (((float)width) - totalTokenWidth) / 2f;
         
-        final TextureRegion highlight = new TextureRegion(mHighlight);
+        final TextureRegion highlight = new TextureRegion(mManager.highlight);
         
-        for (int i = 0; i < mTokenTextures.length; ++i) {
-        	final Texture t = mTokenTextures[i];
+        for (int i = 0; i < mManager.tokens.length; ++i) {
+        	final Texture t = mManager.tokens[i];
+        	
+        	if (t == null) {
+        		break;
+        	}
+        	
             final Image image = new Image(new TextureRegion(t));
             final float imageWidth = image.getWidth() * tokenScale;
             final Vector2 initialPosition = new Vector2(
@@ -252,14 +221,14 @@ public class LevelScreen implements Screen, InputProcessor {
         
         final float standardScale = mScale * STANDARD_SCALING;
         
-        mPointsActor = new Image(new TextureRegion(mPoints));
+        mPointsActor = new Image(new TextureRegion(mManager.points));
         mPointsActor.setPosition(
         		width - (mPointsActor.getWidth() * standardScale * POINTS_OFFSET),
         		height - (mPointsActor.getHeight() * standardScale * POINTS_OFFSET));
         setupActor(mPointsActor, TIME_2, TIME_2, standardScale);
 		
         for (int i = 0; i < mLevel.numBonuses; ++i) {
-        	final Actor actor = new Image(new TextureRegion(mBonus));
+        	final Actor actor = new Image(new TextureRegion(mManager.bonus));
         	final float halfActorWidth = actor.getWidth() * 0.5f * standardScale;
         	final float halfActorHeight = actor.getHeight() * 0.5f * standardScale;
         	
@@ -288,29 +257,6 @@ public class LevelScreen implements Screen, InputProcessor {
 	@Override
 	public void dispose() {
 		mStage.dispose();
-		mBorder.dispose();
-		mBackground.dispose();
-		mGridBackground.dispose();
-		mHighlight.dispose();
-		mBonus.dispose();
-		mPoints.dispose();
-		mTrophy.dispose();
-		
-		for (final Texture t : mGrids) {
-			t.dispose();
-		}
-		
-		for (final Texture t : mTokenTextures) {
-			t.dispose();
-		}
-		
-		for (final Texture t : mGoldTokens) {
-			t.dispose();
-		}
-		
-		for (final Texture t : mDigits) {
-			t.dispose();
-		}
 	}
 
 	@Override
@@ -461,7 +407,7 @@ public class LevelScreen implements Screen, InputProcessor {
         
         for (int i = length - 1; i >= 0; --i) {
         	final int v = Integer.parseInt(score.substring(i, i + 1));
-        	final Actor a = new Image(new TextureRegion(mDigits[v]));
+        	final Actor a = new Image(new TextureRegion(mManager.digits[v]));
         	
         	a.setScale(scale);
         	width += (a.getWidth() * scale);
@@ -476,11 +422,16 @@ public class LevelScreen implements Screen, InputProcessor {
 	private void spawnTarget(final int gridIndex, final int tokenIndex) {
 		if (
 				gridIndex  < 0 || gridIndex  > mGridImages.length ||
-				tokenIndex < 0 || tokenIndex > mGoldTokens.length) {
+				tokenIndex < 0 || tokenIndex > mManager.goldTokens.length) {
 			return;
 		}
 		
-    	final Texture t = mGoldTokens[tokenIndex];
+    	final Texture t = mManager.goldTokens[tokenIndex];
+    	
+    	if (t == null) {
+    		return;
+    	}
+    	
         final float gridX = (mStage.getWidth() - (mGridBackgroundImage.image.getWidth() * mScale)) / 2f;
         final float gridY = (mStage.getHeight() - (mGridBackgroundImage.image.getHeight() * mScale)) / 2f;
         final Actor actor = new Image(new TextureRegion(t, 0, 0, t.getWidth(), t.getHeight()));
@@ -556,7 +507,7 @@ public class LevelScreen implements Screen, InputProcessor {
 
 		}
 
-        final Actor actor = new Image(new TextureRegion(mTrophy));
+        final Actor actor = new Image(new TextureRegion(mManager.trophy));
         
         actor.setScale(mScale);
         actor.setPosition(
