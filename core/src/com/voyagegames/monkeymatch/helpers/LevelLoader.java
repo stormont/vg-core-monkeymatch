@@ -1,7 +1,7 @@
 package com.voyagegames.monkeymatch.helpers;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,14 +24,15 @@ public class LevelLoader {
 	public final int numCols;
 	public final float tokenX;
 	public final float tokenY;
+	public final int gridWidth;
+	public final int gridHeight;
 	public final List<String> tokens = new ArrayList<String>();
 	public final List<Float> tokenWeights = new ArrayList<Float>();
 	public final List<Integer> tokenValues = new ArrayList<Integer>();
 	public final List<GridElement> grids = new ArrayList<GridElement>();
 	
-	public LevelLoader(final String path) throws SAXException, IOException, ParserConfigurationException {
-		final File xml = new File(path);
-		final Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xml);
+	public LevelLoader(final InputStream stream) throws SAXException, IOException, ParserConfigurationException {
+		final Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
 		
 		doc.getDocumentElement().normalize();
 		
@@ -47,6 +48,8 @@ public class LevelLoader {
 		this.numCols = Integer.parseInt(getTagValue("numcols", (Element)globals.item(0)));
 		this.tokenX = Float.parseFloat(getTagValue("tokenx", (Element)globals.item(0)));
 		this.tokenY = Float.parseFloat(getTagValue("tokeny", (Element)globals.item(0)));
+		this.gridWidth = Integer.parseInt(getTagValue("gridwidth", (Element)globals.item(0)));
+		this.gridHeight = Integer.parseInt(getTagValue("gridheight", (Element)globals.item(0)));
 
 		for (int i = 0; i < tokens.getLength(); ++i) {
 			final Node node = tokens.item(i);

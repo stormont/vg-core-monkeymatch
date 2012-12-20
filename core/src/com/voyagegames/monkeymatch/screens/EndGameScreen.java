@@ -7,15 +7,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.voyagegames.monkeymatch.helpers.StaticGridImage;
+import com.voyagegames.monkeymatch.helpers.BundledTexture;
 import com.voyagegames.monkeymatch.helpers.TextureManager;
 
 public class EndGameScreen implements Screen, InputProcessor {
@@ -33,7 +30,7 @@ public class EndGameScreen implements Screen, InputProcessor {
 	private final int           mPersonalBest;
 	private final TextureManager mManager;
     
-    private StaticGridImage mBackgroundActor;
+    private Actor mBackgroundActor;
 	private Actor mButtonActor;
 	private boolean mIsTouched;
 	
@@ -47,7 +44,11 @@ public class EndGameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void dispose() {
-		mStage.dispose();
+		try {
+			//mStage.dispose();
+		} catch (final IllegalArgumentException e) {
+			// no-op; Android libgdx apparently handles this as managed objects 
+		}
 	}
 
 	@Override
@@ -62,55 +63,53 @@ public class EndGameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void show() {
-		mManager.gridBackground = new Texture("backgrounds/bkgd_endgame.png");
-		mManager.gridBackground.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		mManager.gridBackground = new BundledTexture("backgrounds/bkgd_endgame.png", 584, 440);
 	}
 
 	@Override
 	public void resize(final int width, final int height) {
 		mStage.setViewport(width, height, true);
         mStage.clear();
-        mBackgroundActor = new StaticGridImage(mManager.gridBackground, width, height);
+        mBackgroundActor = new Image(mManager.gridBackground.region);
+        mBackgroundActor.setPosition(
+        		(width - (mManager.gridBackground.getWidth()) / 2f),
+        		(height - (mManager.gridBackground.getHeight()) / 2f));
         
         final float scale = width < height ?
         		((float)width) / ((float)mManager.background.getWidth()) :
         		((float)height) / ((float)mManager.background.getHeight());
 
-        final float gridX = (width - (mBackgroundActor.image.getWidth() * scale)) / 2f;
-        final float gridY = (height - (mBackgroundActor.image.getHeight() * scale)) / 2f;
-        final StaticGridImage background = new StaticGridImage(mManager.background, width, height);
+        final float gridX = (width - (mBackgroundActor.getWidth() * scale)) / 2f;
+        final float gridY = (height - (mBackgroundActor.getHeight() * scale)) / 2f;
+        final Actor background = new Image(mManager.background.region);
         
-        background.image.setPosition(0f, 0f);
-        background.image.setWidth(width);
-        background.image.setHeight(height);
-        setupActor(background.image, TIME_0, TIME_1, 1f);
+        background.setPosition(0f, 0f);
+        background.setWidth(width);
+        background.setHeight(height);
+        setupActor(background, TIME_0, TIME_1, 1f);
         
-        mBackgroundActor.image.setPosition(gridX, gridY);
-        setupActor(mBackgroundActor.image, TIME_0, TIME_1, scale);
+        mBackgroundActor.setPosition(gridX, gridY);
+        setupActor(mBackgroundActor, TIME_0, TIME_1, scale);
 
-        final StaticGridImage gridBorder = new StaticGridImage(mManager.border, width, height);
+        final Actor gridBorder = new Image(mManager.border.region);
         final float borderX = ((float)(mManager.border.getWidth() - mManager.gridBackground.getWidth())) / 2f;
         final float borderY = ((float)(mManager.border.getHeight() - mManager.gridBackground.getHeight())) / 2f;
         
-        gridBorder.image.setPosition(gridX - (borderX * scale), gridY - (borderY * scale));
-        setupActor(gridBorder.image, TIME_0, TIME_1, scale);
+        gridBorder.setPosition(gridX - (borderX * scale), gridY - (borderY * scale));
+        setupActor(gridBorder, TIME_0, TIME_1, scale);
         
         setPersonalBestScore(scale);
         setCurrentScore(scale);
         
-        final Actor title = new Image(new TextureRegion(mManager.title));
+        final Actor title = new Image(mManager.title.region);
         title.setPosition(
         		(width - (title.getWidth() * scale)) / 2f,
         		(height - (title.getHeight() * scale)));
         setupActor(title, TIME_0, TIME_1, scale);
         
-        mButtonActor = new Image(new TextureRegion(mManager.start));
-        
-        final float buttonWidth = mButtonActor.getWidth() * scale;
-        final float buttonHeight = mButtonActor.getHeight() * scale;
-        
-        mButtonActor.setPosition((width - buttonWidth) / 2f, gridBorder.image.getY());
-        mButtonActor.setOrigin(buttonWidth / 2f, buttonHeight / 2f);
+        mButtonActor = new Image(mManager.start.region);
+        mButtonActor.setPosition((width - mButtonActor.getWidth() * scale) / 2f, gridBorder.getY());
+        mButtonActor.setOrigin(mButtonActor.getWidth() / 2f, mButtonActor.getHeight() / 2f);
         setupActor(mButtonActor, TIME_4, TIME_1, scale);
         mButtonActor.addAction(Actions.touchable(Touchable.enabled));
         mButtonActor.addAction(Actions.rotateTo(ROTATE_ANGLE));
@@ -176,13 +175,11 @@ public class EndGameScreen implements Screen, InputProcessor {
         final int length = scoreStr.length();
         
         final float trophyScale = scale * TROPHY_SCALE;
-        final TextureRegion region = new TextureRegion(mManager.trophy);
-        final Actor leftTrophy = new Image(region);
-        final Actor rightTrophy = new Image(region);
-        final Actor background = mBackgroundActor.image;
-        final float backgroundX = background.getX();
-        final float backgroundY = background.getY();
-        final float backgroundHeight = background.getHeight() * scale;
+        final Actor leftTrophy = new Image(mManager.trophy.region);
+        final Actor rightTrophy = new Image(mManager.trophy.region);
+        final float backgroundX = mBackgroundActor.getX();
+        final float backgroundY = mBackgroundActor.getY();
+        final float backgroundHeight = mBackgroundActor.getHeight() * scale;
         
         final List<Actor> digits = new ArrayList<Actor>();
         final float trophyWidth = (leftTrophy.getWidth() + rightTrophy.getWidth()) * trophyScale;
@@ -191,13 +188,13 @@ public class EndGameScreen implements Screen, InputProcessor {
         
         for (int i = 0; i < length; ++i) {
         	final int v = Integer.parseInt(scoreStr.substring(i, i + 1));
-        	final Actor a = new Image(new TextureRegion(mManager.digits[v]));
+        	final Actor a = new Image(mManager.digits[v].region);
 
         	width += (a.getWidth() * trophyScale);
         	digits.add(a);
         }
         
-        final float boxWidth = background.getWidth() * scale;
+        final float boxWidth = mBackgroundActor.getWidth() * scale;
         final float offsetY = backgroundY + (backgroundHeight - trophyHeight);
         final float digitOffsetY = offsetY + (trophyHeight / 2f) - (digits.get(0).getHeight() * trophyScale / 2f);
         float offsetX = backgroundX + ((boxWidth - width) / 2f);
@@ -226,12 +223,10 @@ public class EndGameScreen implements Screen, InputProcessor {
         final int length = scoreStr.length();
         
         final float trophyScale = scale * TROPHY_SCALE;
-        final TextureRegion region = new TextureRegion(mManager.points);
-        final Actor bananas = new Image(region);
-        final Actor background = mBackgroundActor.image;
-        final float backgroundX = background.getX();
-        final float backgroundY = background.getY();
-        final float backgroundHeight = background.getHeight() * scale;
+        final Actor bananas = new Image(mManager.points.region);
+        final float backgroundX = mBackgroundActor.getX();
+        final float backgroundY = mBackgroundActor.getY();
+        final float backgroundHeight = mBackgroundActor.getHeight() * scale;
         
         final List<Actor> digits = new ArrayList<Actor>();
         final float bananasWidth = bananas.getWidth() * trophyScale;
@@ -240,13 +235,13 @@ public class EndGameScreen implements Screen, InputProcessor {
         
         for (int i = 0; i < length; ++i) {
         	final int v = Integer.parseInt(scoreStr.substring(i, i + 1));
-        	final Actor a = new Image(new TextureRegion(mManager.digits[v]));
+        	final Actor a = new Image(mManager.digits[v].region);
 
         	width += (a.getWidth() * trophyScale);
         	digits.add(a);
         }
         
-        final float boxWidth = background.getWidth() * scale;
+        final float boxWidth = mBackgroundActor.getWidth() * scale;
         final float offsetY = backgroundY + ((backgroundHeight - bananas.getHeight() * trophyScale) / 2f);
         final float digitOffsetY = offsetY + (bananasHeight / 2f) - (digits.get(0).getHeight() * trophyScale / 2f);
         float offsetX = backgroundX + ((boxWidth - width) / 2f);

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <level>
 	<global>
 	    <background>backgrounds/antarctica/bkgd_antarctica.png</background>
@@ -9,6 +9,8 @@
 		<numcols>7</numcols>
         <tokenx>18.7f</tokenx>
         <tokeny>8.3f</tokeny>
+		<gridwidth>84</gridwidth>
+		<gridheight>63</gridheight>
 	</global>
 	<tokens>
 	    <tokenasset>

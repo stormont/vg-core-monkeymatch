@@ -1,92 +1,81 @@
 package com.voyagegames.monkeymatch.helpers;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 
 public class TextureManager {
 
-    public final Texture[] digits;
-    public final Texture[] grids;
-    public final Texture[] tokens;
-    public final Texture[] goldTokens;
+    public final BundledTexture[] digits;
+    public final BundledTexture[] grids;
+    public final BundledTexture[] tokens;
+    public final BundledTexture[] goldTokens;
     
-    public Texture background;
-    public Texture border;
-    public Texture highlight;
-    public Texture bonus;
-    public Texture points;
-    public Texture trophy;
-    public Texture start;
-    public Texture title;
-    public Texture gridBackground;
+    public BundledTexture background;
+    public BundledTexture border;
+    public BundledTexture highlight;
+    public BundledTexture bonus;
+    public BundledTexture points;
+    public BundledTexture trophy;
+    public BundledTexture start;
+    public BundledTexture title;
+    public BundledTexture gridBackground;
     
     public TextureManager(final int maxGrids, final int maxTokens) {
-    	digits = new Texture[10];
-    	grids = new Texture[maxGrids];
-    	tokens = new Texture[maxTokens];
-    	goldTokens = new Texture[maxTokens];
+    	digits = new BundledTexture[10];
+    	grids = new BundledTexture[maxGrids];
+    	tokens = new BundledTexture[maxTokens];
+    	goldTokens = new BundledTexture[maxTokens];
     }
     
     public void initialize() {
-        background = new Texture("backgrounds/bkgd_tutorial.png");
-        background.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        border = new Texture("backgrounds/bkgd_border.png");
-        border.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        highlight = new Texture("tokens/highlight.png");
-        highlight.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        bonus = new Texture("tokens/banana.png");
-        bonus.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        points = new Texture("tokens/bananas.png");
-        points.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        trophy = new Texture("misc/trophy.png");
-        trophy.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        start = new Texture("tokens/monkey.png");
-        start.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        title = new Texture("misc/title.png");
-        title.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        for (int i = 0; i < digits.length; ++i) {
-        	digits[i] = new Texture("misc/digits" + i + ".png");
-        	digits[i].setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        }
+        background = new BundledTexture("backgrounds/bkgd_tutorial.png", 800, 600);
+        border = new BundledTexture("backgrounds/bkgd_border.png", 600, 450);
+        highlight = new BundledTexture("tokens/highlight.png", 128, 128);
+        bonus = new BundledTexture("tokens/banana.png", 128, 128);
+        points = new BundledTexture("tokens/bananas.png", 128, 128);
+        trophy = new BundledTexture("misc/trophy.png", 256, 256);
+        start = new BundledTexture("tokens/monkey.png", 128, 128);
+        title = new BundledTexture("misc/title.png", 468, 75);
+
+        digits[0] = new BundledTexture("misc/digits0.png", 96, 120);
+        digits[1] = new BundledTexture("misc/digits1.png", 66, 120);
+        digits[2] = new BundledTexture("misc/digits2.png", 84, 120);
+        digits[3] = new BundledTexture("misc/digits3.png", 84, 120);
+        digits[4] = new BundledTexture("misc/digits4.png", 97, 120);
+        digits[5] = new BundledTexture("misc/digits5.png", 90, 120);
+        digits[6] = new BundledTexture("misc/digits6.png", 88, 120);
+        digits[7] = new BundledTexture("misc/digits7.png", 98, 120);
+        digits[8] = new BundledTexture("misc/digits8.png", 88, 120);
+        digits[9] = new BundledTexture("misc/digits9.png", 91, 120);
     }
     
     public void disposeDynamic() {
     	if (gridBackground != null) {
-    		gridBackground.dispose();
+    		gridBackground.texture.dispose();
     		gridBackground = null;
     	}
     	
     	for (int i = 0; i < grids.length; ++i) {
-    		final Texture t = grids[i];
+    		final BundledTexture t = grids[i];
     		
     		if (t != null) {
-    			t.dispose();
+    			t.texture.dispose();
     			grids[i] = null;
     		}
     	}
     	
     	for (int i = 0; i < tokens.length; ++i) {
-    		final Texture t = tokens[i];
+    		final BundledTexture t = tokens[i];
     		
     		if (t != null) {
-    			t.dispose();
+    			t.texture.dispose();
     			tokens[i] = null;
     		}
     	}
     	
     	for (int i = 0; i < goldTokens.length; ++i) {
-    		final Texture t = goldTokens[i];
+    		final BundledTexture t = goldTokens[i];
     		
     		if (t != null) {
-    			t.dispose();
+    			t.texture.dispose();
     			goldTokens[i] = null;
     		}
     	}
@@ -95,17 +84,17 @@ public class TextureManager {
     public void disposeAll() {
     	disposeDynamic();
     	
-		background.dispose();
-		border.dispose();
-		highlight.dispose();
-		bonus.dispose();
-		points.dispose();
-		trophy.dispose();
-		start.dispose();
-		title.dispose();
+		background.texture.dispose();
+		border.texture.dispose();
+		highlight.texture.dispose();
+		bonus.texture.dispose();
+		points.texture.dispose();
+		trophy.texture.dispose();
+		start.texture.dispose();
+		title.texture.dispose();
 		
-		for (final Texture t : digits) {
-			t.dispose();
+		for (final BundledTexture t : digits) {
+			t.texture.dispose();
 		}
     }
     

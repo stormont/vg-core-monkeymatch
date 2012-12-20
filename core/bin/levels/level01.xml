@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <level>
 	<global>
 	    <background>backgrounds/africa/bkgd_africa.png</background>
@@ -9,6 +9,8 @@
 		<numcols>4</numcols>
         <tokenx>32.5f</tokenx>
         <tokeny>14.5f</tokeny>
+		<gridwidth>146</gridwidth>
+		<gridheight>110</gridheight>
 	</global>
 	<tokens>
 	    <tokenasset>

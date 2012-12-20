@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <level>
 	<global>
 	    <background>backgrounds/northamerica/bkgd_northamerica.png</background>
@@ -9,6 +9,8 @@
 		<numcols>6</numcols>
         <tokenx>21.6f</tokenx>
         <tokeny>9.6f</tokeny>
+		<gridwidth>97</gridwidth>
+		<gridheight>73</gridheight>
 	</global>
 	<tokens>
 	    <tokenasset>

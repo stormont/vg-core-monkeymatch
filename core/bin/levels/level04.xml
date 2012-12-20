@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <level>
 	<global>
 	    <background>backgrounds/asia/bkgd_asia.png</background>
@@ -9,6 +9,8 @@
 		<numcols>5</numcols>
         <tokenx>26f</tokenx>
         <tokeny>11.6f</tokeny>
+		<gridwidth>117</gridwidth>
+		<gridheight>88</gridheight>
 	</global>
 	<tokens>
 	    <tokenasset>

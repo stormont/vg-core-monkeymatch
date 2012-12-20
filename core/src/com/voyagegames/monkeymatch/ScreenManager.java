@@ -14,6 +14,8 @@ public class ScreenManager extends Game implements LevelCallback {
 	
 	private static final int MAX_LEVELS = 8;
 
+	private final IApplicationProvider mApp;
+	private final ILogger mLogger;
 	private final IDataProvider mDataProvider;
     private final FPSLogger mFPSLogger;
     private final TextureManager mManager;
@@ -22,8 +24,10 @@ public class ScreenManager extends Game implements LevelCallback {
     private int mLevelCount;
     private int mTotalScore;
     
-    public ScreenManager(final IDataProvider dataProvider) {
+    public ScreenManager(final IApplicationProvider app, final ILogger logger, final IDataProvider dataProvider) {
     	super();
+    	mApp = app;
+    	mLogger = logger;
     	mDataProvider = dataProvider;
         mFPSLogger = new FPSLogger();
         mManager = new TextureManager(49, 5);
@@ -109,35 +113,40 @@ public class ScreenManager extends Game implements LevelCallback {
         		mScreen = new EndGameScreen(this, mTotalScore, mDataProvider.personalBest(), mManager);
         		break;
         	case 1:
-            	mScreen = new LevelScreen("assets/levels/level01.xml", mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level01.xml"), mTotalScore, this, mManager);
         		break;
         	case 2:
-            	mScreen = new LevelScreen("assets/levels/level02.xml", mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level02.xml"), mTotalScore, this, mManager);
         		break;
         	case 3:
-            	mScreen = new LevelScreen("assets/levels/level03.xml", mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level03.xml"), mTotalScore, this, mManager);
         		break;
         	case 4:
-            	mScreen = new LevelScreen("assets/levels/level04.xml", mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level04.xml"), mTotalScore, this, mManager);
         		break;
         	case 5:
-            	mScreen = new LevelScreen("assets/levels/level05.xml", mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level05.xml"), mTotalScore, this, mManager);
         		break;
         	case 6:
-            	mScreen = new LevelScreen("assets/levels/level06.xml", mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level06.xml"), mTotalScore, this, mManager);
         		break;
         	case 7:
-            	mScreen = new LevelScreen("assets/levels/level07.xml", mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level07.xml"), mTotalScore, this, mManager);
         		break;
         	}
         	
             setScreen(mScreen);
     		Gdx.input.setInputProcessor((InputProcessor)mScreen);
         } catch (final Exception e) {
-        	System.out.println(e.toString());
-        	e.printStackTrace();
+        	mLogger.log(e);
         	dispose();
+        	mApp.finish();
         }
+	}
+
+	@Override
+	public void log(final String msg) {
+		mLogger.log(msg);
 	}
 
 }

@@ -9,8 +9,6 @@
 		<numcols>7</numcols>
         <tokenx>18.7f</tokenx>
         <tokeny>8.3f</tokeny>
-		<gridwidth>84</gridwidth>
-		<gridheight>63</gridheight>
 	</global>
 	<tokens>
 	    <tokenasset>
