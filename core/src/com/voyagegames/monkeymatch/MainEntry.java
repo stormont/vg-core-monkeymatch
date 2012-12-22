@@ -14,12 +14,6 @@ public class MainEntry implements IApplicationProvider {
 	}
 
 	@Override
-	public void finish() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public InputStream openAsset(final String path) {
 		try {
 			return new FileInputStream(new File("assets/" + path));
@@ -27,6 +21,12 @@ public class MainEntry implements IApplicationProvider {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	@Override
+	public void finish() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

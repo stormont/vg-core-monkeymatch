@@ -10,7 +10,6 @@ import android.view.WindowManager;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.voyagegames.monkeymatch.IApplicationProvider;
 import com.voyagegames.monkeymatch.ScreenManager;
-import com.voyagegames.monkeymatch.StubDataProvider;
 
 public class MainActivity extends AndroidApplication implements IApplicationProvider {
 	
@@ -23,7 +22,7 @@ public class MainActivity extends AndroidApplication implements IApplicationProv
         final boolean useOpenGLES2 = true;
         
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        mManager = new ScreenManager(this, new Logger(), new StubDataProvider());
+        mManager = new ScreenManager(this, new Logger(), new DataProvider(this));
         initialize(mManager, useOpenGLES2);
 	}
 
