@@ -33,7 +33,7 @@ public class LevelScreen implements Screen, InputProcessor {
 	private static final float BASE_SCALE = 0.6f;
 	private static final float POINTS_OFFSET = 1.25f;
 	private static final float STANDARD_SCALING = 0.45f;
-	private static final float TOKEN_SPACING = 1.5f;
+	private static final float TOKEN_SPACING = 2f;
 	private static final float ROTATE_ANGLE = 10f;
 	private static final float SPAWN_TIME = 3f;
 	private static final float TIME_0 = 0f;
@@ -173,13 +173,20 @@ public class LevelScreen implements Screen, InputProcessor {
         final float tokenScale = mLevel.tokenScale * mScale;
         float totalTokenWidth = 0f;
         
-        for (final BundledTexture t : mTextures.tokens) {
+        for (int i = 0; i < mTextures.tokens.length; ++i) {
+        	final BundledTexture t = mTextures.tokens[i];
+        	
         	if (t == null) {
         		break;
         	}
         	
         	final float tokenWidth = t.getWidth();
-        	totalTokenWidth += tokenWidth * tokenScale * TOKEN_SPACING;
+        	
+        	if (i > 0) {
+        		totalTokenWidth += tokenWidth * tokenScale * TOKEN_SPACING;
+        	} else {
+        		totalTokenWidth += tokenWidth * tokenScale;
+        	}
         }
 
         float offset = (((float)width) - totalTokenWidth) / 2f;
@@ -192,10 +199,7 @@ public class LevelScreen implements Screen, InputProcessor {
         	}
         	
             final Image image = new Image(t.region);
-            final float imageWidth = image.getWidth() * tokenScale;
-            final Vector2 initialPosition = new Vector2(
-            		offset + (imageWidth / 2f * mLevel.tokenScale),
-            		(BASE_SCALE - mLevel.tokenScale) * image.getHeight() * tokenScale);
+            final Vector2 initialPosition = new Vector2(offset, (BASE_SCALE - mLevel.tokenScale) * image.getHeight() * tokenScale);
             final Image highlightImage = new Image(mTextures.highlight.region);
             
             highlightImage.setPosition(initialPosition.x, initialPosition.y);
@@ -208,7 +212,7 @@ public class LevelScreen implements Screen, InputProcessor {
 
             mTokens.add(new Token(image, i, initialPosition, 0f, mLevel.tokenValues.get(i)));
             mHighlights[i] = highlightImage;
-            offset += imageWidth * TOKEN_SPACING;
+            offset += image.getWidth() * tokenScale * TOKEN_SPACING;
         }
         
         final float standardScale = mScale * STANDARD_SCALING;
