@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.voyagegames.monkeymatch.helpers.AudioManager;
+import com.voyagegames.monkeymatch.helpers.AudioManager.SoundSelection;
 import com.voyagegames.monkeymatch.helpers.BundledTexture;
 import com.voyagegames.monkeymatch.helpers.GridBox;
 import com.voyagegames.monkeymatch.helpers.GridElement;
@@ -25,7 +26,6 @@ import com.voyagegames.monkeymatch.helpers.LevelLoader;
 import com.voyagegames.monkeymatch.helpers.TextureManager;
 import com.voyagegames.monkeymatch.helpers.Token;
 import com.voyagegames.monkeymatch.helpers.TokenDrag;
-import com.voyagegames.monkeymatch.helpers.AudioManager.SoundSelection;
 
 public class LevelScreen implements Screen, InputProcessor {
 	
@@ -265,7 +265,7 @@ public class LevelScreen implements Screen, InputProcessor {
 			return false;
 		}
 
-		final Actor a = mStage.hit(x, mStage.getHeight() - y, true);
+		final Actor a = getNearestToken(x, mStage.getHeight() - y);
 		
 		if (a == null) {
 			return false;
@@ -332,7 +332,6 @@ public class LevelScreen implements Screen, InputProcessor {
 			mAudio.playSound(SoundSelection.FAILURE);
 		} else {
 			collectTarget(target, t);
-			mAudio.playSound(SoundSelection.SUCCESS);
 		}
 		
 		resetToken(t);
@@ -642,12 +641,55 @@ public class LevelScreen implements Screen, InputProcessor {
 					Actions.color(mPointsActor.getColor(), TIME_1)
 				));
 		updateScore();
+		mAudio.playSound(SoundSelection.SUCCESS);
 	}
 	
 	private float getDistSquared(final Actor a, final float tokenX, final float tokenY) {
 		final float xDist = (a.getX() - tokenX);
 		final float yDist = (a.getY() - tokenY);
 		return (xDist * xDist) + (yDist * yDist);
+	}
+	
+	private Actor getNearestToken(final float x, final float y) {
+        final float tokenScale = mLevel.tokenScale * mScale;
+		final Token token = mTokens.get(0);
+		final List<Actor> targets = new ArrayList<Actor>();
+		final float tokenWidth = token.actor.getWidth();
+		final float tokenHeight = token.actor.getHeight();
+		final float radius = tokenHeight < tokenWidth ? tokenHeight / 2f : tokenWidth / 2f;
+		final float radiusSq = radius * radius;
+		final float tokenX = x - (token.actor.getWidth() * tokenScale / 2f);
+		final float tokenY = y - (token.actor.getHeight() * tokenScale / 2f);
+		
+		for (final Actor a : mStage.getActors()) {
+			for (final Token t : mTokens) {
+				if (t.actor != a) {
+					continue;
+				}
+				
+				if (getDistSquared(a, tokenX, tokenY) < radiusSq) {
+					targets.add(a);
+				}
+			}
+		}
+		
+		if (targets.size() == 0) {
+			return null;
+		}
+		
+		float closestDist = Float.MAX_VALUE;
+		Actor closestTarget = null;
+		
+		for (final Actor a : targets) {
+			final float distSq = getDistSquared(a, tokenX, tokenY);
+			
+			if (distSq < closestDist) {
+				closestDist = distSq;
+				closestTarget = a;
+			}
+		}
+		
+		return closestTarget;
 	}
 	
 	private Actor getNearestHit(final Token token) {
