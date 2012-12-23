@@ -107,6 +107,7 @@ public class ScreenManager extends Game implements LevelCallback {
         
         try {
     		Gdx.input.setInputProcessor(null);
+    		Gdx.input.setCatchBackKey(false);
     		
         	if (mScreen != null) {
         		mScreen.pause();
@@ -148,6 +149,7 @@ public class ScreenManager extends Game implements LevelCallback {
         	
             setScreen(mScreen);
     		Gdx.input.setInputProcessor((InputProcessor)mScreen);
+    		Gdx.input.setCatchBackKey(true);
         } catch (final Exception e) {
         	mLogger.log(e);
         	dispose();
@@ -158,6 +160,18 @@ public class ScreenManager extends Game implements LevelCallback {
 	@Override
 	public void log(final String msg) {
 		mLogger.log(msg);
+	}
+	
+	@Override
+	public void exitSignaled() {
+		if (mLevelCount == 0) {
+			dispose();
+			mApp.finish();
+			return;
+		}
+		
+		mLevelCount = MAX_LEVELS - 1;
+		levelComplete(mTotalScore);
 	}
 
 }

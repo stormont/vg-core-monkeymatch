@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -341,6 +342,19 @@ public class LevelScreen implements Screen, InputProcessor {
 		resetToken(t);
 		mDrag = null;
 		return true;
+	}
+
+	@Override
+	public boolean keyDown(final int keyCode) {
+        if (keyCode == Keys.BACK) {
+    		synchronized (mCallback) {
+    			hide();
+    		}
+    		
+        	mCallback.exitSignaled();
+         }
+        
+		return false;
 	}
 	
 	private void setupActor(final Actor actor, final float delay, final float fadeIn, final float scale) {
@@ -756,12 +770,6 @@ public class LevelScreen implements Screen, InputProcessor {
 	public void hide() {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public boolean keyDown(final int keyCode) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override

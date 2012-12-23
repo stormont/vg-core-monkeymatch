@@ -50,13 +50,11 @@ public class MainActivity extends AndroidApplication implements IApplicationProv
 
 	@Override
 	public Music openMusic(final String path) {
-		Log.e("MainActivity", path);
 		return Gdx.audio.newMusic(Gdx.files.internal(path));
 	}
 
 	@Override
 	public Sound openSound(final String path) {
-		Log.e("MainActivity", path);
 		return Gdx.audio.newSound(Gdx.files.internal(path));
 	}
 	

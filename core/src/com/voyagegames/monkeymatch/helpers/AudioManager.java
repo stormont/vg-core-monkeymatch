@@ -62,27 +62,68 @@ public class AudioManager {
 	}
 	
 	public void initialize() {
-		mJungle = mApp.openMusic("sounds/jungle.mp3");
-		mWin = mApp.openMusic("sounds/win.mp3");
-		mSuccess = mApp.openSound("sounds/success.mp3");
-		mFailure = mApp.openSound("sounds/fail.mp3");
-		mApplause = mApp.openSound("sounds/applause.mp3");
+		if (mJungle == null) {
+			mJungle = mApp.openMusic("sounds/jungle.mp3");
+		}
+		
+		if (mWin == null) {
+			mWin = mApp.openMusic("sounds/win.mp3");
+		}
+		
+		if (mSuccess == null) {
+			mSuccess = mApp.openSound("sounds/success.mp3");
+		}
+		
+		if (mFailure == null) {
+			mFailure = mApp.openSound("sounds/fail.mp3");
+		}
+		
+		if (mApplause == null) {
+			mApplause = mApp.openSound("sounds/applause.mp3");
+		}
 	}
 	
 	public void dispose() {
-		mJungle.dispose();
-		mWin.dispose();
-		mSuccess.dispose();
-		mFailure.dispose();
-		mApplause.dispose();
+		if (mJungle != null) {
+			mJungle.dispose();
+			mJungle = null;
+		}
+		
+		if (mWin != null) {
+			mWin.dispose();
+			mWin = null;
+		}
+		
+		if (mSuccess != null) {
+			mSuccess.dispose();
+			mSuccess = null;
+		}
+		
+		if (mFailure != null) {
+			mFailure.dispose();
+			mFailure = null;
+		}
+		
+		if (mApplause != null) {
+			mApplause.dispose();
+			mApplause = null;
+		}
 	}
 	
 	public boolean isMusicPlaying() {
 		switch (mMusic) {
 		case JUNGLE:
-			return mJungle.isPlaying();
+			if (mJungle != null) {
+				return mJungle.isPlaying();
+			}
+			
+			return false;
 		case WIN:
-			return mWin.isPlaying();
+			if (mWin != null) {
+				return mWin.isPlaying();
+			}
+			
+			return false;
 		default:
 			return false;
 		}
@@ -91,10 +132,14 @@ public class AudioManager {
 	public void stopMusic() {
 		switch (mMusic) {
 		case JUNGLE:
-			mJungle.stop();
+			if (mJungle != null) {
+				mJungle.stop();
+			}
 			break;
 		case WIN:
-			mWin.stop();
+			if (mWin != null) {
+				mWin.stop();
+			}
 			break;
 		}
 	}
@@ -109,14 +154,18 @@ public class AudioManager {
 		
 		switch (selection) {
 		case JUNGLE:
-			mJungle.setLooping(true);
-			mJungle.setVolume(mVolume);
-			mJungle.play();
+			if (mJungle != null) {
+				mJungle.setLooping(true);
+				mJungle.setVolume(mVolume);
+				mJungle.play();
+			}
 			break;
 		case WIN:
-			mWin.setLooping(false);
-			mWin.setVolume(mVolume);
-			mWin.play();
+			if (mWin != null) {
+				mWin.setLooping(false);
+				mWin.setVolume(mVolume);
+				mWin.play();
+			}
 			break;
 		}
 		
@@ -130,13 +179,19 @@ public class AudioManager {
 		
 		switch (selection) {
 		case SUCCESS:
-			mSuccess.play(mVolume);
+			if (mSuccess != null) {
+				mSuccess.play(mVolume);
+			}
 			break;
 		case FAILURE:
-			mFailure.play(mVolume);
+			if (mFailure != null) {
+				mFailure.play(mVolume);
+			}
 			break;
 		case APPLAUSE:
-			mApplause.play(mVolume);
+			if (mApplause != null) {
+				mApplause.play(mVolume);
+			}
 			break;
 		}
 	}
