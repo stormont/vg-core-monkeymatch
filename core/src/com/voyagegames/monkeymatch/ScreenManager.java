@@ -34,7 +34,7 @@ public class ScreenManager extends Game implements LevelCallback {
     	mDataProvider = dataProvider;
         mFPSLogger = new FPSLogger();
         mTextures = new TextureManager(49, 5);
-        mAudio = new AudioManager();
+        mAudio = new AudioManager(app);
     }
 
 	@Override

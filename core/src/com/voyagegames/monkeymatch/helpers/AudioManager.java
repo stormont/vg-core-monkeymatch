@@ -1,9 +1,8 @@
 package com.voyagegames.monkeymatch.helpers;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.files.FileHandle;
+import com.voyagegames.monkeymatch.IApplicationProvider;
 
 public class AudioManager {
 	
@@ -19,6 +18,8 @@ public class AudioManager {
 		APPLAUSE
 	}
 	
+	private final IApplicationProvider mApp;
+	
 	private boolean mEnabled;
 	private float mVolume;
 	private MusicSelection mMusic;
@@ -28,7 +29,8 @@ public class AudioManager {
 	private Sound mFailure;
 	private Sound mApplause;
 	
-	public AudioManager() {
+	public AudioManager(final IApplicationProvider app) {
+		mApp = app;
 		mEnabled = true;
 		mVolume = 1f;
 		mMusic = MusicSelection.NONE;
@@ -60,11 +62,11 @@ public class AudioManager {
 	}
 	
 	public void initialize() {
-		mJungle = Gdx.audio.newMusic(new FileHandle("assets/sounds/jungle.mp3"));
-		mWin = Gdx.audio.newMusic(new FileHandle("assets/sounds/win.mp3"));
-		mSuccess = Gdx.audio.newSound(new FileHandle("assets/sounds/success.mp3"));
-		mFailure = Gdx.audio.newSound(new FileHandle("assets/sounds/fail.mp3"));
-		mApplause = Gdx.audio.newSound(new FileHandle("assets/sounds/applause.mp3"));
+		mJungle = mApp.openMusic("sounds/jungle.mp3");
+		mWin = mApp.openMusic("sounds/win.mp3");
+		mSuccess = mApp.openSound("sounds/success.mp3");
+		mFailure = mApp.openSound("sounds/fail.mp3");
+		mApplause = mApp.openSound("sounds/applause.mp3");
 	}
 	
 	public void dispose() {

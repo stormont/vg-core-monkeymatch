@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.voyagegames.monkeymatch.IApplicationProvider;
 import com.voyagegames.monkeymatch.ScreenManager;
@@ -43,6 +46,18 @@ public class MainActivity extends AndroidApplication implements IApplicationProv
 			Log.e("MainActivity", e.toString(), e);
 			return null;
 		} 
+	}
+
+	@Override
+	public Music openMusic(final String path) {
+		Log.e("MainActivity", path);
+		return Gdx.audio.newMusic(Gdx.files.internal(path));
+	}
+
+	@Override
+	public Sound openSound(final String path) {
+		Log.e("MainActivity", path);
+		return Gdx.audio.newSound(Gdx.files.internal(path));
 	}
 	
 }

@@ -249,7 +249,7 @@ public class LevelScreen implements Screen, InputProcessor {
 	@Override
 	public void dispose() {
 		try {
-			//mStage.dispose();
+			mStage.dispose();
 		} catch (final IllegalArgumentException e) {
 			// no-op; Android libgdx apparently handles this as managed objects 
 		}
@@ -329,8 +329,10 @@ public class LevelScreen implements Screen, InputProcessor {
 		
 		if (target == null) {
 			removeBonus();
+			mAudio.playSound(SoundSelection.FAILURE);
 		} else {
 			collectTarget(target, t);
+			mAudio.playSound(SoundSelection.SUCCESS);
 		}
 		
 		resetToken(t);
@@ -613,8 +615,6 @@ public class LevelScreen implements Screen, InputProcessor {
 					Actions.moveBy(0f, -bonus.getHeight() / 2f, TIME_2),
 					Actions.removeActor()
 				));
-		
-		mAudio.playSound(SoundSelection.FAILURE);
 	}
 	
 	private void collectTarget(final Actor target, final Token token) {
@@ -642,7 +642,6 @@ public class LevelScreen implements Screen, InputProcessor {
 					Actions.color(mPointsActor.getColor(), TIME_1)
 				));
 		updateScore();
-		mAudio.playSound(SoundSelection.SUCCESS);
 	}
 	
 	private float getDistSquared(final Actor a, final float tokenX, final float tokenY) {
