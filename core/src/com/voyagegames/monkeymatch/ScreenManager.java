@@ -5,7 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.FPSLogger;
+import com.voyagegames.monkeymatch.helpers.AudioManager;
 import com.voyagegames.monkeymatch.helpers.TextureManager;
+import com.voyagegames.monkeymatch.helpers.AudioManager.MusicSelection;
 import com.voyagegames.monkeymatch.screens.EndGameScreen;
 import com.voyagegames.monkeymatch.screens.LevelCallback;
 import com.voyagegames.monkeymatch.screens.LevelScreen;
@@ -18,7 +20,8 @@ public class ScreenManager extends Game implements LevelCallback {
 	private final ILogger mLogger;
 	private final IDataProvider mDataProvider;
     private final FPSLogger mFPSLogger;
-    private final TextureManager mManager;
+    private final TextureManager mTextures;
+    private final AudioManager mAudio;
     
     private Screen mScreen;
     private int mLevelCount;
@@ -30,13 +33,15 @@ public class ScreenManager extends Game implements LevelCallback {
     	mLogger = logger;
     	mDataProvider = dataProvider;
         mFPSLogger = new FPSLogger();
-        mManager = new TextureManager(49, 5);
+        mTextures = new TextureManager(49, 5);
+        mAudio = new AudioManager();
     }
 
 	@Override
 	public void create() {
         mLevelCount = MAX_LEVELS - 1;
-        mManager.initialize();
+        mTextures.initialize();
+        mAudio.initialize();
         levelComplete(0);
 	}
  
@@ -58,7 +63,8 @@ public class ScreenManager extends Game implements LevelCallback {
 			screen.dispose();
 		}
 		
-    	mManager.disposeAll();
+    	mTextures.disposeAll();
+    	mAudio.dispose();
 	}
 
 	@Override
@@ -105,33 +111,38 @@ public class ScreenManager extends Game implements LevelCallback {
         	if (mScreen != null) {
         		mScreen.pause();
         		mScreen.dispose();
-        		mManager.disposeDynamic();
+        		mTextures.disposeDynamic();
         	}
         	
         	switch (mLevelCount) {
         	case 0:
-        		mScreen = new EndGameScreen(this, mTotalScore, mDataProvider.personalBest(), mManager);
+        		if (mTotalScore > 0) {
+        			mAudio.stopMusic();
+        			mAudio.playMusic(MusicSelection.WIN);
+        		}
+        		
+        		mScreen = new EndGameScreen(mTotalScore, mDataProvider.personalBest(), this, mTextures, mAudio);
         		break;
         	case 1:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level01.xml"), mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level01.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 2:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level02.xml"), mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level02.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 3:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level03.xml"), mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level03.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 4:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level04.xml"), mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level04.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 5:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level05.xml"), mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level05.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 6:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level06.xml"), mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level06.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 7:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level07.xml"), mTotalScore, this, mManager);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level07.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	}
         	

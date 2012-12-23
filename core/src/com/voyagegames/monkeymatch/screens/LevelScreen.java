@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.voyagegames.monkeymatch.helpers.AudioManager;
 import com.voyagegames.monkeymatch.helpers.BundledTexture;
 import com.voyagegames.monkeymatch.helpers.GridBox;
 import com.voyagegames.monkeymatch.helpers.GridElement;
@@ -24,6 +25,7 @@ import com.voyagegames.monkeymatch.helpers.LevelLoader;
 import com.voyagegames.monkeymatch.helpers.TextureManager;
 import com.voyagegames.monkeymatch.helpers.Token;
 import com.voyagegames.monkeymatch.helpers.TokenDrag;
+import com.voyagegames.monkeymatch.helpers.AudioManager.SoundSelection;
 
 public class LevelScreen implements Screen, InputProcessor {
 	
@@ -43,10 +45,11 @@ public class LevelScreen implements Screen, InputProcessor {
 
 	private final Random mRandomGenerator = new Random();
 	
-	private final Stage         mStage;
-	private final LevelLoader   mLevel;
-	private final LevelCallback mCallback;
-	private final TextureManager mManager;
+	private final Stage          mStage;
+	private final LevelLoader    mLevel;
+	private final LevelCallback  mCallback;
+	private final TextureManager mTextures;
+	private final AudioManager   mAudio;
 	
     private final boolean[] mGridInUse;
     private final boolean[] mGridCollected;
@@ -75,12 +78,14 @@ public class LevelScreen implements Screen, InputProcessor {
 			final InputStream levelXML,
 			final int score,
 			final LevelCallback callback,
-			final TextureManager manager) throws Exception {
+			final TextureManager textures,
+			final AudioManager audio) throws Exception {
 		mStage = new Stage(0, 0, true);
 		mLevel = new LevelLoader(levelXML);
 		mPointsScore = score;
 		mCallback = callback;
-		mManager = manager;
+		mTextures = textures;
+		mAudio = audio;
 		
 		mTargetSpawnTime = mLevel.spawnTime;
 		mGridElements = mLevel.numRows * mLevel.numCols;
@@ -94,15 +99,15 @@ public class LevelScreen implements Screen, InputProcessor {
 	public void show() {
         mElapsedTime = 0f;
         
-        mManager.gridBackground = new BundledTexture(mLevel.background, 584, 440);
+        mTextures.gridBackground = new BundledTexture(mLevel.background, 584, 440);
         
         for (int i = 0; i < mLevel.grids.size(); ++i) {
-        	mManager.grids[i] = new BundledTexture(mLevel.grids.get(i).asset, mLevel.gridWidth, mLevel.gridHeight);
+        	mTextures.grids[i] = new BundledTexture(mLevel.grids.get(i).asset, mLevel.gridWidth, mLevel.gridHeight);
         }
 
         for (int i = 0; i < mLevel.tokens.size(); ++i) {
-        	mManager.tokens[i] = new BundledTexture("tokens/" + mLevel.tokens.get(i), 128, 128);
-        	mManager.goldTokens[i] = new BundledTexture("tokens/gold" + mLevel.tokens.get(i), 128, 128);
+        	mTextures.tokens[i] = new BundledTexture("tokens/" + mLevel.tokens.get(i), 128, 128);
+        	mTextures.goldTokens[i] = new BundledTexture("tokens/gold" + mLevel.tokens.get(i), 128, 128);
         }
 	}
 
@@ -135,14 +140,14 @@ public class LevelScreen implements Screen, InputProcessor {
         	mGridCollected[i] = false;
         }
         
-        mGridBackgroundActor = new Image(mManager.gridBackground.region);
+        mGridBackgroundActor = new Image(mTextures.gridBackground.region);
         mScale = width < height ?
-        		((float)width) / ((float)mManager.background.getWidth()) :
-        		((float)height) / ((float)mManager.background.getHeight());
+        		((float)width) / ((float)mTextures.background.getWidth()) :
+        		((float)height) / ((float)mTextures.background.getHeight());
 
         final float gridX = (width - (mGridBackgroundActor.getWidth() * mScale)) / 2f;
         final float gridY = (height - (mGridBackgroundActor.getHeight() * mScale)) / 2f;
-        final Actor background = new Image(mManager.background.region);
+        final Actor background = new Image(mTextures.background.region);
         
         background.setPosition(0f, 0f);
         background.setWidth(width);
@@ -153,14 +158,14 @@ public class LevelScreen implements Screen, InputProcessor {
         setupActor(mGridBackgroundActor, TIME_0, TIME_1, mScale);
 
         for (int i = 0; i < mGridElements; ++i) {
-        	mGridImages[i] = new Image(mManager.grids[i].region);
+        	mGridImages[i] = new Image(mTextures.grids[i].region);
         	mGridImages[i].setPosition(gridX + mLevel.grids.get(i).x * mScale, gridY + mLevel.grids.get(i).y * mScale);
             setupActor(mGridImages[i], TIME_5, TIME_2, mScale);
         }
 
-        final Actor gridBorder = new Image(mManager.border.region);
-        final float borderX = ((float)(mManager.border.getWidth() - mManager.gridBackground.getWidth())) / 2f;
-        final float borderY = ((float)(mManager.border.getHeight() - mManager.gridBackground.getHeight())) / 2f;
+        final Actor gridBorder = new Image(mTextures.border.region);
+        final float borderX = ((float)(mTextures.border.getWidth() - mTextures.gridBackground.getWidth())) / 2f;
+        final float borderY = ((float)(mTextures.border.getHeight() - mTextures.gridBackground.getHeight())) / 2f;
         
         gridBorder.setPosition(gridX - (borderX * mScale), gridY - (borderY * mScale));
         setupActor(gridBorder, TIME_0, TIME_1, mScale);
@@ -168,7 +173,7 @@ public class LevelScreen implements Screen, InputProcessor {
         final float tokenScale = mLevel.tokenScale * mScale;
         float totalTokenWidth = 0f;
         
-        for (final BundledTexture t : mManager.tokens) {
+        for (final BundledTexture t : mTextures.tokens) {
         	if (t == null) {
         		break;
         	}
@@ -179,8 +184,8 @@ public class LevelScreen implements Screen, InputProcessor {
 
         float offset = (((float)width) - totalTokenWidth) / 2f;
         
-        for (int i = 0; i < mManager.tokens.length; ++i) {
-        	final BundledTexture t = mManager.tokens[i];
+        for (int i = 0; i < mTextures.tokens.length; ++i) {
+        	final BundledTexture t = mTextures.tokens[i];
         	
         	if (t == null) {
         		break;
@@ -191,7 +196,7 @@ public class LevelScreen implements Screen, InputProcessor {
             final Vector2 initialPosition = new Vector2(
             		offset + (imageWidth / 2f * mLevel.tokenScale),
             		(BASE_SCALE - mLevel.tokenScale) * image.getHeight() * tokenScale);
-            final Image highlightImage = new Image(mManager.highlight.region);
+            final Image highlightImage = new Image(mTextures.highlight.region);
             
             highlightImage.setPosition(initialPosition.x, initialPosition.y);
             setupActor(highlightImage, TIME_2, TIME_2, tokenScale);
@@ -208,14 +213,14 @@ public class LevelScreen implements Screen, InputProcessor {
         
         final float standardScale = mScale * STANDARD_SCALING;
         
-        mPointsActor = new Image(mManager.points.region);
+        mPointsActor = new Image(mTextures.points.region);
         mPointsActor.setPosition(
         		width - (mPointsActor.getWidth() * standardScale * POINTS_OFFSET),
         		height - (mPointsActor.getHeight() * standardScale * POINTS_OFFSET));
         setupActor(mPointsActor, TIME_2, TIME_2, standardScale);
 		
         for (int i = 0; i < mLevel.numBonuses; ++i) {
-        	final Actor actor = new Image(mManager.bonus.region);
+        	final Actor actor = new Image(mTextures.bonus.region);
         	final float halfActorWidth = actor.getWidth() * 0.5f * standardScale;
         	final float halfActorHeight = actor.getHeight() * 0.5f * standardScale;
         	
@@ -398,7 +403,7 @@ public class LevelScreen implements Screen, InputProcessor {
         
         for (int i = length - 1; i >= 0; --i) {
         	final int v = Integer.parseInt(score.substring(i, i + 1));
-        	final Actor a = new Image(mManager.digits[v].region);
+        	final Actor a = new Image(mTextures.digits[v].region);
         	
         	a.setScale(scale);
         	width += (a.getWidth() * scale);
@@ -413,11 +418,11 @@ public class LevelScreen implements Screen, InputProcessor {
 	private void spawnTarget(final int gridIndex, final int tokenIndex) {
 		if (
 				gridIndex  < 0 || gridIndex  > mGridImages.length ||
-				tokenIndex < 0 || tokenIndex > mManager.goldTokens.length) {
+				tokenIndex < 0 || tokenIndex > mTextures.goldTokens.length) {
 			return;
 		}
 		
-    	final BundledTexture t = mManager.goldTokens[tokenIndex];
+    	final BundledTexture t = mTextures.goldTokens[tokenIndex];
     	
     	if (t == null) {
     		return;
@@ -498,7 +503,7 @@ public class LevelScreen implements Screen, InputProcessor {
 
 		}
 
-        final Actor actor = new Image(mManager.trophy.region);
+        final Actor actor = new Image(mTextures.trophy.region);
         
         actor.setScale(mScale);
         actor.setPosition(
@@ -507,11 +512,20 @@ public class LevelScreen implements Screen, InputProcessor {
         actor.addAction(Actions.sequence(
         		Actions.delay(TIME_2 * mBonuses.size()),
         		Actions.fadeIn(TIME_2),
+        		new Action() {
+
+					@Override
+					public boolean act(final float delta) {
+						mAudio.playSound(SoundSelection.APPLAUSE);
+						return true;
+					}
+        			
+        		},
         		Actions.delay(TIME_4),
         		new Action() {
         			
 					@Override
-					public boolean act(float delta) {
+					public boolean act(final float delta) {
 						for (final Actor a : mStage.getActors()) {
 							if (a == actor) {
 								continue;
@@ -599,6 +613,8 @@ public class LevelScreen implements Screen, InputProcessor {
 					Actions.moveBy(0f, -bonus.getHeight() / 2f, TIME_2),
 					Actions.removeActor()
 				));
+		
+		mAudio.playSound(SoundSelection.FAILURE);
 	}
 	
 	private void collectTarget(final Actor target, final Token token) {
@@ -626,6 +642,7 @@ public class LevelScreen implements Screen, InputProcessor {
 					Actions.color(mPointsActor.getColor(), TIME_1)
 				));
 		updateScore();
+		mAudio.playSound(SoundSelection.SUCCESS);
 	}
 	
 	private float getDistSquared(final Actor a, final float tokenX, final float tokenY) {

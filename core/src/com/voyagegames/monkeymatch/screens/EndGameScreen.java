@@ -12,8 +12,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.voyagegames.monkeymatch.helpers.AudioManager;
 import com.voyagegames.monkeymatch.helpers.BundledTexture;
 import com.voyagegames.monkeymatch.helpers.TextureManager;
+import com.voyagegames.monkeymatch.helpers.AudioManager.MusicSelection;
 
 public class EndGameScreen implements Screen, InputProcessor {
 
@@ -24,22 +26,29 @@ public class EndGameScreen implements Screen, InputProcessor {
 	private static final float TIME_3 = 0.75f;
 	private static final float TIME_4 = 1f;
 
-	private final Stage         mStage;
-	private final LevelCallback mCallback;
-	private final int           mScore;
-	private final int           mPersonalBest;
-	private final TextureManager mManager;
+	private final Stage          mStage;
+	private final LevelCallback  mCallback;
+	private final int            mScore;
+	private final int            mPersonalBest;
+	private final TextureManager mTextures;
+	private final AudioManager   mAudio;
     
     private Actor mBackgroundActor;
 	private Actor mButtonActor;
 	private boolean mIsTouched;
 	
-	public EndGameScreen(final LevelCallback callback, final int score, final int personalBest, final TextureManager manager) {
+	public EndGameScreen(
+			final int score,
+			final int personalBest,
+			final LevelCallback callback,
+			final TextureManager textures,
+			final AudioManager audio) {
 		mStage = new Stage(0, 0, true);
 		mCallback = callback;
 		mScore = score;
 		mPersonalBest = personalBest;
-		mManager = manager;
+		mTextures = textures;
+		mAudio = audio;
 	}
 
 	@Override
@@ -54,6 +63,10 @@ public class EndGameScreen implements Screen, InputProcessor {
 	@Override
 	public void render(final float delta) {
 		synchronized (mCallback) {
+			if (mAudio.enabled() && !mAudio.isMusicPlaying()) {
+				mAudio.playMusic(MusicSelection.JUNGLE);
+			}
+			
 	    	Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
 	    	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 	        mStage.act(delta);
@@ -63,25 +76,25 @@ public class EndGameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void show() {
-		mManager.gridBackground = new BundledTexture("backgrounds/bkgd_endgame.png", 584, 440);
+		mTextures.gridBackground = new BundledTexture("backgrounds/bkgd_endgame.png", 584, 440);
 	}
 
 	@Override
 	public void resize(final int width, final int height) {
 		mStage.setViewport(width, height, true);
         mStage.clear();
-        mBackgroundActor = new Image(mManager.gridBackground.region);
+        mBackgroundActor = new Image(mTextures.gridBackground.region);
         mBackgroundActor.setPosition(
-        		(width - (mManager.gridBackground.getWidth()) / 2f),
-        		(height - (mManager.gridBackground.getHeight()) / 2f));
+        		(width - (mTextures.gridBackground.getWidth()) / 2f),
+        		(height - (mTextures.gridBackground.getHeight()) / 2f));
         
         final float scale = width < height ?
-        		((float)width) / ((float)mManager.background.getWidth()) :
-        		((float)height) / ((float)mManager.background.getHeight());
+        		((float)width) / ((float)mTextures.background.getWidth()) :
+        		((float)height) / ((float)mTextures.background.getHeight());
 
         final float gridX = (width - (mBackgroundActor.getWidth() * scale)) / 2f;
         final float gridY = (height - (mBackgroundActor.getHeight() * scale)) / 2f;
-        final Actor background = new Image(mManager.background.region);
+        final Actor background = new Image(mTextures.background.region);
         
         background.setPosition(0f, 0f);
         background.setWidth(width);
@@ -91,9 +104,9 @@ public class EndGameScreen implements Screen, InputProcessor {
         mBackgroundActor.setPosition(gridX, gridY);
         setupActor(mBackgroundActor, TIME_0, TIME_1, scale);
 
-        final Actor gridBorder = new Image(mManager.border.region);
-        final float borderX = ((float)(mManager.border.getWidth() - mManager.gridBackground.getWidth())) / 2f;
-        final float borderY = ((float)(mManager.border.getHeight() - mManager.gridBackground.getHeight())) / 2f;
+        final Actor gridBorder = new Image(mTextures.border.region);
+        final float borderX = ((float)(mTextures.border.getWidth() - mTextures.gridBackground.getWidth())) / 2f;
+        final float borderY = ((float)(mTextures.border.getHeight() - mTextures.gridBackground.getHeight())) / 2f;
         
         gridBorder.setPosition(gridX - (borderX * scale), gridY - (borderY * scale));
         setupActor(gridBorder, TIME_0, TIME_1, scale);
@@ -101,13 +114,13 @@ public class EndGameScreen implements Screen, InputProcessor {
         setPersonalBestScore(scale);
         setCurrentScore(scale);
         
-        final Actor title = new Image(mManager.title.region);
+        final Actor title = new Image(mTextures.title.region);
         title.setPosition(
         		(width - (title.getWidth() * scale)) / 2f,
         		(height - (title.getHeight() * scale)));
         setupActor(title, TIME_0, TIME_1, scale);
         
-        mButtonActor = new Image(mManager.start.region);
+        mButtonActor = new Image(mTextures.start.region);
         mButtonActor.setPosition((width - mButtonActor.getWidth() * scale) / 2f, gridBorder.getY());
         mButtonActor.setOrigin(mButtonActor.getWidth() / 2f, mButtonActor.getHeight() / 2f);
         setupActor(mButtonActor, TIME_4, TIME_1, scale);
@@ -175,8 +188,8 @@ public class EndGameScreen implements Screen, InputProcessor {
         final int length = scoreStr.length();
         
         final float trophyScale = scale * TROPHY_SCALE;
-        final Actor leftTrophy = new Image(mManager.trophy.region);
-        final Actor rightTrophy = new Image(mManager.trophy.region);
+        final Actor leftTrophy = new Image(mTextures.trophy.region);
+        final Actor rightTrophy = new Image(mTextures.trophy.region);
         final float backgroundX = mBackgroundActor.getX();
         final float backgroundY = mBackgroundActor.getY();
         final float backgroundHeight = mBackgroundActor.getHeight() * scale;
@@ -188,7 +201,7 @@ public class EndGameScreen implements Screen, InputProcessor {
         
         for (int i = 0; i < length; ++i) {
         	final int v = Integer.parseInt(scoreStr.substring(i, i + 1));
-        	final Actor a = new Image(mManager.digits[v].region);
+        	final Actor a = new Image(mTextures.digits[v].region);
 
         	width += (a.getWidth() * trophyScale);
         	digits.add(a);
@@ -223,7 +236,7 @@ public class EndGameScreen implements Screen, InputProcessor {
         final int length = scoreStr.length();
         
         final float trophyScale = scale * TROPHY_SCALE;
-        final Actor bananas = new Image(mManager.points.region);
+        final Actor bananas = new Image(mTextures.points.region);
         final float backgroundX = mBackgroundActor.getX();
         final float backgroundY = mBackgroundActor.getY();
         final float backgroundHeight = mBackgroundActor.getHeight() * scale;
@@ -235,7 +248,7 @@ public class EndGameScreen implements Screen, InputProcessor {
         
         for (int i = 0; i < length; ++i) {
         	final int v = Integer.parseInt(scoreStr.substring(i, i + 1));
-        	final Actor a = new Image(mManager.digits[v].region);
+        	final Actor a = new Image(mTextures.digits[v].region);
 
         	width += (a.getWidth() * trophyScale);
         	digits.add(a);
