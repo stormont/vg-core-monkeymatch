@@ -30,9 +30,10 @@ public class OptionsScreen implements Screen, InputProcessor {
 	private final TextureManager mTextures;
 	private final AudioManager   mAudio;
     
-    private Actor mBackgroundActor;
-	private Actor mButtonActor;
+    private Actor   mBackgroundActor;
+	private Actor   mButtonActor;
 	private boolean mIsTouched;
+	private float   mScale;
 	
 	public OptionsScreen(
 			final LevelCallback callback,
@@ -80,13 +81,12 @@ public class OptionsScreen implements Screen, InputProcessor {
         mBackgroundActor.setPosition(
         		(width - (mTextures.gridBackground.getWidth()) / 2f),
         		(height - (mTextures.gridBackground.getHeight()) / 2f));
-        
-        final float scale = width < height ?
+        mScale = width < height ?
         		((float)width) / ((float)mTextures.background.getWidth()) :
         		((float)height) / ((float)mTextures.background.getHeight());
 
-        final float gridX = (width - (mBackgroundActor.getWidth() * scale)) / 2f;
-        final float gridY = (height - (mBackgroundActor.getHeight() * scale)) / 2f;
+        final float gridX = (width - (mBackgroundActor.getWidth() * mScale)) / 2f;
+        final float gridY = (height - (mBackgroundActor.getHeight() * mScale)) / 2f;
         final Actor background = new Image(mTextures.background.region);
         
         background.setPosition(0f, 0f);
@@ -95,22 +95,22 @@ public class OptionsScreen implements Screen, InputProcessor {
         setupActor(background, TIME_0, TIME_1, 1f);
         
         mBackgroundActor.setPosition(gridX, gridY);
-        setupActor(mBackgroundActor, TIME_0, TIME_1, scale);
+        setupActor(mBackgroundActor, TIME_0, TIME_1, mScale);
 
         final Actor gridBorder = new Image(mTextures.border.region);
         final float borderX = ((float)(mTextures.border.getWidth() - mTextures.gridBackground.getWidth())) / 2f;
         final float borderY = ((float)(mTextures.border.getHeight() - mTextures.gridBackground.getHeight())) / 2f;
         
-        gridBorder.setPosition(gridX - (borderX * scale), gridY - (borderY * scale));
-        setupActor(gridBorder, TIME_0, TIME_1, scale);
+        gridBorder.setPosition(gridX - (borderX * mScale), gridY - (borderY * mScale));
+        setupActor(gridBorder, TIME_0, TIME_1, mScale);
         
         final Actor title = new Image(mTextures.title.region);
         title.setPosition(
-        		(width - (title.getWidth() * scale)) / 2f,
-        		(height - (title.getHeight() * scale)));
-        setupActor(title, TIME_0, TIME_1, scale);
+        		(width - (title.getWidth() * mScale)) / 2f,
+        		(height - (title.getHeight() * mScale)));
+        setupActor(title, TIME_0, TIME_1, mScale);
 
-        final float logoScale = scale * LOGO_SCALE;
+        final float logoScale = mScale * LOGO_SCALE;
         final Actor logoActor = new Image(mTextures.logo.region);
         logoActor.setPosition(0f, 0f);
         setupActor(logoActor, TIME_0, TIME_1, logoScale);
@@ -118,7 +118,7 @@ public class OptionsScreen implements Screen, InputProcessor {
         final Actor monkeyActor = new Image(mTextures.start.region);
         monkeyActor.setPosition(
         		gridBorder.getX() + BORDER_WIDTH,
-        		gridBorder.getY() - BORDER_WIDTH + gridBorder.getHeight() - (monkeyActor.getHeight() * logoScale));
+        		gridBorder.getY() - BORDER_WIDTH + (mTextures.gridBackground.getHeight() * mScale) - (monkeyActor.getHeight() * logoScale));
         setupActor(monkeyActor, TIME_0, TIME_1, logoScale);
         
         final Actor voyageGamesActor = new Image(mTextures.voyageGames.region);
@@ -140,11 +140,13 @@ public class OptionsScreen implements Screen, InputProcessor {
         setupActor(soundJayActor, TIME_0, TIME_1, logoScale);
         
         mButtonActor = new Image(mTextures.start.region);
-        mButtonActor.setPosition((width - mButtonActor.getWidth() * scale) / 2f, gridBorder.getY());
-        mButtonActor.setOrigin(mButtonActor.getWidth() / 2f, mButtonActor.getHeight() / 2f);
-        setupActor(mButtonActor, TIME_4, TIME_1, scale);
+        mButtonActor.setPosition(
+        		gridBorder.getX() + (gridBorder.getWidth() * mScale / 2f) - (mButtonActor.getWidth() * mScale) / 2f,
+        		gridBorder.getY());
+        mButtonActor.setOrigin(mButtonActor.getWidth() * mScale / 2f, mButtonActor.getHeight() * mScale / 2f);
+        setupActor(mButtonActor, TIME_4, TIME_1, mScale);
         mButtonActor.addAction(Actions.touchable(Touchable.enabled));
-        mButtonActor.addAction(Actions.scaleTo(SCALE_SIZE, SCALE_SIZE));
+        mButtonActor.addAction(Actions.scaleTo(SCALE_SIZE * mScale, SCALE_SIZE * mScale));
         addStartButtonActions();
         
 	}
@@ -207,8 +209,8 @@ public class OptionsScreen implements Screen, InputProcessor {
 	
 	private void addStartButtonActions() {
         mButtonActor.addAction(Actions.forever(Actions.sequence(
-        		Actions.scaleTo(1f, 1f, TIME_3),
-        		Actions.scaleTo(SCALE_SIZE, SCALE_SIZE, TIME_3)
+        		Actions.scaleTo(mScale, mScale, TIME_3),
+        		Actions.scaleTo(SCALE_SIZE * mScale, SCALE_SIZE * mScale, TIME_3)
         	)));
 	}
 	
