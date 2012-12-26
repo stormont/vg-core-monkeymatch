@@ -16,6 +16,7 @@ public class TextureManager {
     public BundledTexture trophy;
     public BundledTexture start;
     public BundledTexture title;
+    public BundledTexture logo;
     public BundledTexture gridBackground;
     
     public TextureManager(final int maxGrids, final int maxTokens) {
@@ -34,6 +35,7 @@ public class TextureManager {
         trophy = new BundledTexture("misc/trophy.png", 256, 256);
         start = new BundledTexture("tokens/monkey.png", 128, 128);
         title = new BundledTexture("misc/title.png", 468, 75);
+        logo = new BundledTexture("misc/logo.png", 128, 128);
 
         digits[0] = new BundledTexture("misc/digits0.png", 96, 120);
         digits[1] = new BundledTexture("misc/digits1.png", 66, 120);
@@ -92,6 +94,7 @@ public class TextureManager {
 		trophy.texture.dispose();
 		start.texture.dispose();
 		title.texture.dispose();
+		logo.texture.dispose();
 		
 		for (final BundledTexture t : digits) {
 			t.texture.dispose();

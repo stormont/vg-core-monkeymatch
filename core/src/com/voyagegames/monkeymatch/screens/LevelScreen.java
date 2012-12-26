@@ -31,6 +31,7 @@ import com.voyagegames.monkeymatch.helpers.TokenDrag;
 public class LevelScreen implements Screen, InputProcessor {
 	
 	private static final int BONUS_SCORE = 5;
+	private static final float LOGO_SCALE = 0.75f;
 	private static final float BASE_SCALE = 0.6f;
 	private static final float POINTS_OFFSET = 1.25f;
 	private static final float STANDARD_SCALING = 0.45f;
@@ -170,6 +171,10 @@ public class LevelScreen implements Screen, InputProcessor {
         
         gridBorder.setPosition(gridX - (borderX * mScale), gridY - (borderY * mScale));
         setupActor(gridBorder, TIME_0, TIME_1, mScale);
+        
+        final Actor logoActor = new Image(mTextures.logo.region);
+        logoActor.setPosition(0f, 0f);
+        setupActor(logoActor, TIME_0, TIME_1, mScale * LOGO_SCALE);
 
         final float tokenScale = mLevel.tokenScale * mScale;
         float totalTokenWidth = 0f;

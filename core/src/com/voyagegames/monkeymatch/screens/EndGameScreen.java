@@ -21,7 +21,8 @@ import com.voyagegames.monkeymatch.helpers.AudioManager.MusicSelection;
 public class EndGameScreen implements Screen, InputProcessor {
 
 	private static final float TROPHY_SCALE = 0.5f;
-	private static final float ROTATE_ANGLE =30f;
+	private static final float SCALE_SIZE = 1.2f;
+	private static final float LOGO_SCALE = 0.75f;
 	private static final float TIME_0 = 0f;
 	private static final float TIME_1 = 0.25f;
 	private static final float TIME_3 = 0.75f;
@@ -55,7 +56,7 @@ public class EndGameScreen implements Screen, InputProcessor {
 	@Override
 	public void dispose() {
 		try {
-			//mStage.dispose();
+			mStage.dispose();
 		} catch (final IllegalArgumentException e) {
 			// no-op; Android libgdx apparently handles this as managed objects 
 		}
@@ -121,13 +122,18 @@ public class EndGameScreen implements Screen, InputProcessor {
         		(height - (title.getHeight() * scale)));
         setupActor(title, TIME_0, TIME_1, scale);
         
+        final Actor logoActor = new Image(mTextures.logo.region);
+        logoActor.setPosition(0f, 0f);
+        setupActor(logoActor, TIME_0, TIME_1, scale * LOGO_SCALE);
+        
         mButtonActor = new Image(mTextures.start.region);
         mButtonActor.setPosition((width - mButtonActor.getWidth() * scale) / 2f, gridBorder.getY());
         mButtonActor.setOrigin(mButtonActor.getWidth() / 2f, mButtonActor.getHeight() / 2f);
         setupActor(mButtonActor, TIME_4, TIME_1, scale);
         mButtonActor.addAction(Actions.touchable(Touchable.enabled));
-        mButtonActor.addAction(Actions.rotateTo(ROTATE_ANGLE));
+        mButtonActor.addAction(Actions.scaleTo(SCALE_SIZE, SCALE_SIZE));
         addRotateActions();
+        
 	}
 	
 	@Override
@@ -188,8 +194,8 @@ public class EndGameScreen implements Screen, InputProcessor {
 	
 	private void addRotateActions() {
         mButtonActor.addAction(Actions.forever(Actions.sequence(
-        		Actions.rotateTo(-ROTATE_ANGLE, TIME_3),
-        		Actions.rotateTo(ROTATE_ANGLE, TIME_3)
+        		Actions.scaleTo(1f, 1f, TIME_3),
+        		Actions.scaleTo(SCALE_SIZE, SCALE_SIZE, TIME_3)
         	)));
 	}
 	
