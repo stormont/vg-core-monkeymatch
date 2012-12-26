@@ -15,6 +15,12 @@ public class BundledTexture {
 		this.region = new TextureRegion(texture, 0, 0, width, height);
 	}
 	
+	public BundledTexture(final String texturePath, final int width, final int height, final int offsetX, final int offsetY) {
+		this.texture = new Texture(texturePath);
+        this.texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		this.region = new TextureRegion(texture, offsetX, offsetY, width, height);
+	}
+	
 	public float getWidth() {
 		return region.getRegionWidth();
 	}

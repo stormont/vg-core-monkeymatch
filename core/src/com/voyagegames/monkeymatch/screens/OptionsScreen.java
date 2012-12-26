@@ -19,6 +19,7 @@ public class OptionsScreen implements Screen, InputProcessor {
 
 	private static final float SCALE_SIZE = 1.2f;
 	private static final float LOGO_SCALE = 0.75f;
+	private static final float BORDER_WIDTH = 10f;
 	private static final float TIME_0 = 0f;
 	private static final float TIME_1 = 0.25f;
 	private static final float TIME_3 = 0.75f;
@@ -108,10 +109,35 @@ public class OptionsScreen implements Screen, InputProcessor {
         		(width - (title.getWidth() * scale)) / 2f,
         		(height - (title.getHeight() * scale)));
         setupActor(title, TIME_0, TIME_1, scale);
-        
+
+        final float logoScale = scale * LOGO_SCALE;
         final Actor logoActor = new Image(mTextures.logo.region);
         logoActor.setPosition(0f, 0f);
-        setupActor(logoActor, TIME_0, TIME_1, scale * LOGO_SCALE);
+        setupActor(logoActor, TIME_0, TIME_1, logoScale);
+        
+        final Actor monkeyActor = new Image(mTextures.start.region);
+        monkeyActor.setPosition(
+        		gridBorder.getX() + BORDER_WIDTH,
+        		gridBorder.getY() - BORDER_WIDTH + gridBorder.getHeight() - (monkeyActor.getHeight() * logoScale));
+        setupActor(monkeyActor, TIME_0, TIME_1, logoScale);
+        
+        final Actor voyageGamesActor = new Image(mTextures.voyageGames.region);
+        voyageGamesActor.setPosition(
+        		monkeyActor.getX() + (monkeyActor.getWidth() * logoScale),
+        		monkeyActor.getY() + (voyageGamesActor.getHeight() * logoScale / 4f));
+        setupActor(voyageGamesActor, TIME_0, TIME_1, logoScale);
+        
+        final Actor musicActor = new Image(mTextures.music.region);
+        musicActor.setPosition(
+        		gridBorder.getX() + BORDER_WIDTH,
+        		monkeyActor.getY() - (musicActor.getHeight() * logoScale));
+        setupActor(musicActor, TIME_0, TIME_1, logoScale);
+        
+        final Actor soundJayActor = new Image(mTextures.soundJay.region);
+        soundJayActor.setPosition(
+        		musicActor.getX() + (musicActor.getWidth() * logoScale),
+        		musicActor.getY() + (soundJayActor.getHeight() * logoScale / 4f));
+        setupActor(soundJayActor, TIME_0, TIME_1, logoScale);
         
         mButtonActor = new Image(mTextures.start.region);
         mButtonActor.setPosition((width - mButtonActor.getWidth() * scale) / 2f, gridBorder.getY());
