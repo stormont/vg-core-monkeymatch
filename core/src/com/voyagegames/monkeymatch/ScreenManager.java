@@ -6,15 +6,17 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.voyagegames.monkeymatch.helpers.AudioManager;
-import com.voyagegames.monkeymatch.helpers.TextureManager;
 import com.voyagegames.monkeymatch.helpers.AudioManager.MusicSelection;
+import com.voyagegames.monkeymatch.helpers.TextureManager;
 import com.voyagegames.monkeymatch.screens.EndGameScreen;
 import com.voyagegames.monkeymatch.screens.LevelCallback;
 import com.voyagegames.monkeymatch.screens.LevelScreen;
+import com.voyagegames.monkeymatch.screens.OptionsScreen;
 
 public class ScreenManager extends Game implements LevelCallback {
 	
 	private static final int MAX_LEVELS = 8;
+	private static final int MAIN_MENU_LEVEL = MAX_LEVELS - 1;
 
 	private final IApplicationProvider mApp;
 	private final ILogger mLogger;
@@ -39,7 +41,7 @@ public class ScreenManager extends Game implements LevelCallback {
 
 	@Override
 	public void create() {
-        mLevelCount = MAX_LEVELS - 1;
+        mLevelCount = MAIN_MENU_LEVEL;
         mTextures.initialize();
         mAudio.initialize();
         levelComplete(0);
@@ -158,6 +160,31 @@ public class ScreenManager extends Game implements LevelCallback {
 	}
 
 	@Override
+	public void showOptions() {
+        try {
+    		Gdx.input.setInputProcessor(null);
+    		Gdx.input.setCatchBackKey(false);
+    		
+        	if (mScreen != null) {
+        		mScreen.pause();
+        		mScreen.dispose();
+        		mTextures.disposeDynamic();
+        	}
+        	
+        	mScreen = new OptionsScreen(this, mTextures, mAudio);
+        	mLevelCount = MAIN_MENU_LEVEL;
+        	
+            setScreen(mScreen);
+    		Gdx.input.setInputProcessor((InputProcessor)mScreen);
+    		Gdx.input.setCatchBackKey(true);
+        } catch (final Exception e) {
+        	mLogger.log(e);
+        	dispose();
+        	mApp.finish();
+        }
+	}
+
+	@Override
 	public void log(final String msg) {
 		mLogger.log(msg);
 	}
@@ -170,7 +197,7 @@ public class ScreenManager extends Game implements LevelCallback {
 			return;
 		}
 		
-		mLevelCount = MAX_LEVELS - 1;
+		mLevelCount = MAIN_MENU_LEVEL;
 		levelComplete(mTotalScore);
 	}
 

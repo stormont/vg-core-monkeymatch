@@ -1,12 +1,9 @@
 package com.voyagegames.monkeymatch.screens;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -14,13 +11,12 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.voyagegames.monkeymatch.helpers.AudioManager;
+import com.voyagegames.monkeymatch.helpers.AudioManager.MusicSelection;
 import com.voyagegames.monkeymatch.helpers.BundledTexture;
 import com.voyagegames.monkeymatch.helpers.TextureManager;
-import com.voyagegames.monkeymatch.helpers.AudioManager.MusicSelection;
 
-public class EndGameScreen implements Screen, InputProcessor {
+public class OptionsScreen implements Screen, InputProcessor {
 
-	private static final float TROPHY_SCALE = 0.5f;
 	private static final float SCALE_SIZE = 1.2f;
 	private static final float LOGO_SCALE = 0.75f;
 	private static final float TIME_0 = 0f;
@@ -30,26 +26,19 @@ public class EndGameScreen implements Screen, InputProcessor {
 
 	private final Stage          mStage;
 	private final LevelCallback  mCallback;
-	private final int            mScore;
-	private final int            mPersonalBest;
 	private final TextureManager mTextures;
 	private final AudioManager   mAudio;
     
     private Actor mBackgroundActor;
 	private Actor mButtonActor;
-	private Actor mOptionsActor;
 	private boolean mIsTouched;
 	
-	public EndGameScreen(
-			final int score,
-			final int personalBest,
+	public OptionsScreen(
 			final LevelCallback callback,
 			final TextureManager textures,
 			final AudioManager audio) {
 		mStage = new Stage(0, 0, true);
 		mCallback = callback;
-		mScore = score;
-		mPersonalBest = personalBest;
 		mTextures = textures;
 		mAudio = audio;
 	}
@@ -114,9 +103,6 @@ public class EndGameScreen implements Screen, InputProcessor {
         gridBorder.setPosition(gridX - (borderX * scale), gridY - (borderY * scale));
         setupActor(gridBorder, TIME_0, TIME_1, scale);
         
-        setPersonalBestScore(scale);
-        setCurrentScore(scale);
-        
         final Actor title = new Image(mTextures.title.region);
         title.setPosition(
         		(width - (title.getWidth() * scale)) / 2f,
@@ -126,12 +112,6 @@ public class EndGameScreen implements Screen, InputProcessor {
         final Actor logoActor = new Image(mTextures.logo.region);
         logoActor.setPosition(0f, 0f);
         setupActor(logoActor, TIME_0, TIME_1, scale * LOGO_SCALE);
-        
-        final float optionsScale = scale * LOGO_SCALE;
-        mOptionsActor = new Image(mTextures.options.region);
-        mOptionsActor.setPosition(width - (mOptionsActor.getWidth() * optionsScale), 0f);
-        mOptionsActor.addAction(Actions.touchable(Touchable.enabled));
-        setupActor(mOptionsActor, TIME_0, TIME_1, optionsScale);
         
         mButtonActor = new Image(mTextures.start.region);
         mButtonActor.setPosition((width - mButtonActor.getWidth() * scale) / 2f, gridBorder.getY());
@@ -147,7 +127,7 @@ public class EndGameScreen implements Screen, InputProcessor {
 	public boolean touchDown(final int x, final int y, final int pointer, final int button) {
 		final Actor a = mStage.hit(x, mStage.getHeight() - y, true);
 		
-		if (a != mButtonActor && a != mOptionsActor) {
+		if (a != mButtonActor) {
 			return false;
 		}
 
@@ -166,9 +146,6 @@ public class EndGameScreen implements Screen, InputProcessor {
 		
 		if (a == mButtonActor) {
 			mCallback.levelComplete(0);
-			return true;
-		} else if (a == mOptionsActor) {
-			mCallback.showOptions();
 			return true;
 		}
 
@@ -207,97 +184,6 @@ public class EndGameScreen implements Screen, InputProcessor {
         		Actions.scaleTo(1f, 1f, TIME_3),
         		Actions.scaleTo(SCALE_SIZE, SCALE_SIZE, TIME_3)
         	)));
-	}
-	
-	private void setPersonalBestScore(final float scale) {
-		if (mPersonalBest <= 0) {
-			return;
-		}
-		
-        final String scoreStr = String.valueOf(mPersonalBest);
-        final int length = scoreStr.length();
-        
-        final float trophyScale = scale * TROPHY_SCALE;
-        final Actor leftTrophy = new Image(mTextures.trophy.region);
-        final Actor rightTrophy = new Image(mTextures.trophy.region);
-        final float backgroundX = mBackgroundActor.getX();
-        final float backgroundY = mBackgroundActor.getY();
-        final float backgroundHeight = mBackgroundActor.getHeight() * scale;
-        
-        final List<Actor> digits = new ArrayList<Actor>();
-        final float trophyWidth = (leftTrophy.getWidth() + rightTrophy.getWidth()) * trophyScale;
-        final float trophyHeight = leftTrophy.getHeight() * trophyScale;
-        float width = trophyWidth;
-        
-        for (int i = 0; i < length; ++i) {
-        	final int v = Integer.parseInt(scoreStr.substring(i, i + 1));
-        	final Actor a = new Image(mTextures.digits[v].region);
-
-        	width += (a.getWidth() * trophyScale);
-        	digits.add(a);
-        }
-        
-        final float boxWidth = mBackgroundActor.getWidth() * scale;
-        final float offsetY = backgroundY + (backgroundHeight - trophyHeight);
-        final float digitOffsetY = offsetY + (trophyHeight / 2f) - (digits.get(0).getHeight() * trophyScale / 2f);
-        float offsetX = backgroundX + ((boxWidth - width) / 2f);
-        
-        leftTrophy.setPosition(offsetX, offsetY);
-        setupActor(leftTrophy, TIME_1, TIME_1, trophyScale);
-        offsetX += leftTrophy.getWidth() * trophyScale;
-        
-        for (final Actor a : digits) {
-        	a.setPosition(offsetX, digitOffsetY);
-            setupActor(a, TIME_1, TIME_1, trophyScale);
-        	offsetX += (a.getWidth() * trophyScale);
-        }
-        
-        rightTrophy.setPosition(offsetX, offsetY);
-        setupActor(rightTrophy, TIME_1, TIME_1, trophyScale);
-        offsetX += rightTrophy.getWidth() * trophyScale;
-	}
-	
-	private void setCurrentScore(final float scale) {
-		if (mScore <= 0) {
-			return;
-		}
-		
-        final String scoreStr = String.valueOf(mScore);
-        final int length = scoreStr.length();
-        
-        final float trophyScale = scale * TROPHY_SCALE;
-        final Actor bananas = new Image(mTextures.points.region);
-        final float backgroundX = mBackgroundActor.getX();
-        final float backgroundY = mBackgroundActor.getY();
-        final float backgroundHeight = mBackgroundActor.getHeight() * scale;
-        
-        final List<Actor> digits = new ArrayList<Actor>();
-        final float bananasWidth = bananas.getWidth() * trophyScale;
-        final float bananasHeight = bananas.getHeight() * trophyScale;
-        float width = bananasWidth;
-        
-        for (int i = 0; i < length; ++i) {
-        	final int v = Integer.parseInt(scoreStr.substring(i, i + 1));
-        	final Actor a = new Image(mTextures.digits[v].region);
-
-        	width += (a.getWidth() * trophyScale);
-        	digits.add(a);
-        }
-        
-        final float boxWidth = mBackgroundActor.getWidth() * scale;
-        final float offsetY = backgroundY + ((backgroundHeight - bananas.getHeight() * trophyScale) / 2f);
-        final float digitOffsetY = offsetY + (bananasHeight / 2f) - (digits.get(0).getHeight() * trophyScale / 2f);
-        float offsetX = backgroundX + ((boxWidth - width) / 2f);
-        
-        bananas.setPosition(offsetX, offsetY);
-        setupActor(bananas, TIME_3, TIME_1, trophyScale);
-        offsetX += bananasWidth;
-        
-        for (final Actor a : digits) {
-        	a.setPosition(offsetX, digitOffsetY);
-            setupActor(a, TIME_3, TIME_1, trophyScale);
-        	offsetX += (a.getWidth() * trophyScale);
-        }
 	}
 	
 	//
