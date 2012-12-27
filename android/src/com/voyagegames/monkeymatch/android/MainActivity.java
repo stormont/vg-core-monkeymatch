@@ -30,11 +30,26 @@ public class MainActivity extends AndroidApplication implements IApplicationProv
 	}
 
 	@Override
-	protected void onDestroy() {
+	public void finish() {
+		this.exit();
+		
 		if (mManager != null) {
 			mManager.dispose();
+			mManager = null;
 		}
+
+		super.finish();
+	}
+
+	@Override
+	protected void onDestroy() {
+		this.exit();
 		
+		if (mManager != null) {
+			mManager.dispose();
+			mManager = null;
+		}
+
 		super.onDestroy();
 	}
 

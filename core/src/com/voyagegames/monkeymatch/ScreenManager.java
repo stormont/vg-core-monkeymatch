@@ -192,7 +192,6 @@ public class ScreenManager extends Game implements LevelCallback {
 	@Override
 	public void exitSignaled() {
 		if (mLevelCount == 0) {
-			dispose();
 			mApp.finish();
 			return;
 		}
