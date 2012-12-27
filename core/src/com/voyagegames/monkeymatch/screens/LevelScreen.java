@@ -515,6 +515,18 @@ public class LevelScreen implements Screen, InputProcessor {
 
 						@Override
 						public boolean act(final float delta) {
+							final float tokenScale = mLevel.tokenScale * mScale;
+							final Actor points = new Image(mTextures.plus[0].region);
+							points.setPosition(
+									bonus.getX() + (bonus.getWidth() * tokenScale / 4f),
+									bonus.getY() + (bonus.getHeight() * tokenScale / 4f));
+							points.setScale(bonus.getScaleX(), bonus.getScaleY());
+							points.addAction(Actions.sequence(
+									Actions.delay(TIME_2),
+									Actions.fadeOut(TIME_2),
+									Actions.removeActor()
+								));
+							mStage.addActor(points);
 							addScore(BONUS_SCORE);
 							return true;
 						}
@@ -574,6 +586,7 @@ public class LevelScreen implements Screen, InputProcessor {
 							mVictoryDone = true;
 						}
 						
+						mStage.clear();
 						mCallback.levelComplete(mPointsScore);
 						return true;
 					}
@@ -640,6 +653,39 @@ public class LevelScreen implements Screen, InputProcessor {
 	}
 	
 	private void collectTarget(final Actor target, final Token token) {
+		Actor points = null;
+		
+		switch (token.value) {
+		case 1:
+			points = new Image(mTextures.plus[1].region);
+			break;
+		case 2:
+			points = new Image(mTextures.plus[2].region);
+			break;
+		case 4:
+			points = new Image(mTextures.plus[3].region);
+			break;
+		case 8:
+			points = new Image(mTextures.plus[4].region);
+			break;
+		case 16:
+			points = new Image(mTextures.plus[5].region);
+			break;
+		}
+		
+		if (points == null) {
+			throw new IllegalArgumentException("Token with unexpected value: " + token.value);
+		}
+
+		points.setPosition(target.getX(), target.getY());
+		points.setScale(target.getScaleX(), target.getScaleY());
+		points.addAction(Actions.sequence(
+				Actions.delay(TIME_2),
+				Actions.fadeOut(TIME_2),
+				Actions.removeActor()
+			));
+		mStage.addActor(points);
+		
 		target.remove();
 		mTargets.remove(target);
 		

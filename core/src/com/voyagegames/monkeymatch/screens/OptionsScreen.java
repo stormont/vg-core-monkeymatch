@@ -173,6 +173,7 @@ public class OptionsScreen implements Screen, InputProcessor {
 		final Actor a = mStage.hit(x, mStage.getHeight() - y, true);
 		
 		if (a == mButtonActor) {
+			mStage.clear();
 			mCallback.levelComplete(0);
 			return true;
 		}

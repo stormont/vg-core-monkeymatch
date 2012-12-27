@@ -13,8 +13,14 @@ import com.badlogic.gdx.files.FileHandle;
 
 public class MainEntry implements IApplicationProvider {
 	
+	public LwjglApplication app;
+	
 	public static void main(final String[] args) {
-		new LwjglApplication(new ScreenManager(new MainEntry(), new StubLogger(), new StubDataProvider()), "Demo", 800, 600, true);
+		final MainEntry m = new MainEntry();
+		final LwjglApplication app = new LwjglApplication(
+				new ScreenManager(m, new StubLogger(), new StubDataProvider()), "Demo", 800, 600, true);
+		
+		m.app = app;
 	}
 
 	@Override
@@ -29,8 +35,8 @@ public class MainEntry implements IApplicationProvider {
 
 	@Override
 	public void finish() {
-		// TODO Auto-generated method stub
-		
+		app.stop();
+		app.exit();
 	}
 
 	@Override

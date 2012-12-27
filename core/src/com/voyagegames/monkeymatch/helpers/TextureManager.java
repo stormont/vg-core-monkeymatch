@@ -2,11 +2,14 @@ package com.voyagegames.monkeymatch.helpers;
 
 
 public class TextureManager {
+	
+	private static final int NUM_PLUSSES = 6;
 
     public final BundledTexture[] digits;
     public final BundledTexture[] grids;
     public final BundledTexture[] tokens;
     public final BundledTexture[] goldTokens;
+    public final BundledTexture[] plus;
     
     public BundledTexture background;
     public BundledTexture border;
@@ -28,6 +31,7 @@ public class TextureManager {
     	grids = new BundledTexture[maxGrids];
     	tokens = new BundledTexture[maxTokens];
     	goldTokens = new BundledTexture[maxTokens];
+    	plus = new BundledTexture[NUM_PLUSSES];
     }
     
     public void initialize() {
@@ -55,6 +59,13 @@ public class TextureManager {
         digits[7] = new BundledTexture("misc/digits7.png", 98, 120);
         digits[8] = new BundledTexture("misc/digits8.png", 88, 120);
         digits[9] = new BundledTexture("misc/digits9.png", 91, 120);
+        
+        plus[0] = new BundledTexture("tokens/plus5.png", 128, 128);
+        plus[1] = new BundledTexture("tokens/plus1.png", 128, 128);
+        plus[2] = new BundledTexture("tokens/plus2.png", 128, 128);
+        plus[3] = new BundledTexture("tokens/plus4.png", 128, 128);
+        plus[4] = new BundledTexture("tokens/plus8.png", 128, 128);
+        plus[5] = new BundledTexture("tokens/plus16.png", 128, 128);
     }
     
     public void disposeDynamic() {
@@ -111,6 +122,10 @@ public class TextureManager {
 		for (final BundledTexture t : digits) {
 			t.texture.dispose();
 		}
+    	
+    	for (final BundledTexture t : plus) {
+    		t.texture.dispose();
+    	}
     }
     
 }
