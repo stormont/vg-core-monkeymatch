@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.voyagegames.monkeymatch;
+package com.voyagegames.monkeymatch.free;
 
 public final class R {
     public static final class attr {
@@ -25,17 +25,15 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int dummy_button=0x7f070002;
-        public static final int fullscreen_content=0x7f070000;
-        public static final int fullscreen_content_controls=0x7f070001;
+        public static final int ad=0x7f070000;
+        public static final int fullscreen_content=0x7f070001;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
     }
     public static final class string {
+        public static final int admob_id=0x7f050001;
         public static final int app_name=0x7f050000;
-        public static final int dummy_button=0x7f050002;
-        public static final int dummy_content=0x7f050001;
     }
     public static final class style {
         /** 
@@ -84,8 +82,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ButtonBarContainerTheme_buttonBarButtonStyle com.voyagegames.monkeymatch:buttonBarButtonStyle}</code></td><td></td></tr>
-           <tr><td><code>{@link #ButtonBarContainerTheme_buttonBarStyle com.voyagegames.monkeymatch:buttonBarStyle}</code></td><td></td></tr>
+           <tr><td><code>{@link #ButtonBarContainerTheme_buttonBarButtonStyle com.voyagegames.monkeymatch.free:buttonBarButtonStyle}</code></td><td></td></tr>
+           <tr><td><code>{@link #ButtonBarContainerTheme_buttonBarStyle com.voyagegames.monkeymatch.free:buttonBarStyle}</code></td><td></td></tr>
            </table>
            @see #ButtonBarContainerTheme_buttonBarButtonStyle
            @see #ButtonBarContainerTheme_buttonBarStyle
@@ -94,7 +92,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
             0x7f010000, 0x7f010001
         };
         /**
-          <p>This symbol is the offset where the {@link com.voyagegames.monkeymatch.R.attr#buttonBarButtonStyle}
+          <p>This symbol is the offset where the {@link com.voyagegames.monkeymatch.free.R.attr#buttonBarButtonStyle}
           attribute's value can be found in the {@link #ButtonBarContainerTheme} array.
 
 
@@ -104,7 +102,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public static final int ButtonBarContainerTheme_buttonBarButtonStyle = 1;
         /**
-          <p>This symbol is the offset where the {@link com.voyagegames.monkeymatch.R.attr#buttonBarStyle}
+          <p>This symbol is the offset where the {@link com.voyagegames.monkeymatch.free.R.attr#buttonBarStyle}
           attribute's value can be found in the {@link #ButtonBarContainerTheme} array.
 
 
