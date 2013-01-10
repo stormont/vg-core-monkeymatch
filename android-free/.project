@@ -32,6 +32,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>src/com/voyagegames/monkeymatch/ConfigData.java</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/core/src/com/voyagegames/monkeymatch/ConfigData.java</locationURI>
+		</link>
+		<link>
 			<name>src/com/voyagegames/monkeymatch/IApplicationProvider.java</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/core/src/com/voyagegames/monkeymatch/IApplicationProvider.java</locationURI>
