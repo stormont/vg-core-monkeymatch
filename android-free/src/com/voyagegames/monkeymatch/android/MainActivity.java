@@ -3,6 +3,8 @@ package com.voyagegames.monkeymatch.android;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +22,7 @@ import com.google.ads.AdRequest;
 import com.google.ads.AdRequest.ErrorCode;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
+import com.voyagegames.monkeymatch.ConfigData;
 import com.voyagegames.monkeymatch.IApplicationProvider;
 import com.voyagegames.monkeymatch.ScreenManager;
 
@@ -43,6 +46,7 @@ public class MainActivity extends AndroidApplication implements IApplicationProv
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 
         mManager = new ScreenManager(this, new Logger(), new DataProvider(this));
+        mManager.setConfig(new ConfigData(true));
 
         final RelativeLayout layout = new RelativeLayout(this);
         final View gameView = initializeForView(mManager, useOpenGLES2);
@@ -122,6 +126,25 @@ public class MainActivity extends AndroidApplication implements IApplicationProv
 	@Override
 	public Sound openSound(final String path) {
 		return Gdx.audio.newSound(Gdx.files.internal(path));
+	}
+
+	@Override
+	public void launchWebsite() {
+		final String url = "http://www.voyagegames.com";
+		final Intent intent = new Intent(Intent.ACTION_VIEW);
+		
+		intent.setData(Uri.parse(url));
+		startActivity(intent);
+	}
+
+	@Override
+	public void launchFullVersion() {
+		startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("market://details?id=com.voyagegames.monkeymatch")));
+	}
+
+	@Override
+	public void launchReview() {
+		startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("market://details?id=com.voyagegames.monkeymatch.free")));
 	}
 	
 }

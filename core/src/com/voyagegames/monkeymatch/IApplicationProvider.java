@@ -11,5 +11,8 @@ public interface IApplicationProvider {
 	public Music openMusic(String path);
 	public Sound openSound(String path);
 	public void finish();
+	public void launchWebsite();
+	public void launchFullVersion();
+	public void launchReview();
 
 }

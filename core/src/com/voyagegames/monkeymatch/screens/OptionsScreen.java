@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.voyagegames.monkeymatch.ConfigData;
 import com.voyagegames.monkeymatch.helpers.AudioManager;
 import com.voyagegames.monkeymatch.helpers.AudioManager.MusicSelection;
 import com.voyagegames.monkeymatch.helpers.BundledTexture;
@@ -17,32 +18,33 @@ import com.voyagegames.monkeymatch.helpers.TextureManager;
 
 public class OptionsScreen implements Screen, InputProcessor {
 
-	private static final float SCALE_SIZE = 1.2f;
 	private static final float LOGO_SCALE = 0.75f;
-	private static final float BORDER_WIDTH = 10f;
+	private static final float WEBSITE_OFFSET_Y = 140f;
 	private static final float TIME_0 = 0f;
 	private static final float TIME_1 = 0.25f;
-	private static final float TIME_3 = 0.75f;
-	private static final float TIME_4 = 1f;
 
 	private final Stage          mStage;
 	private final LevelCallback  mCallback;
 	private final TextureManager mTextures;
 	private final AudioManager   mAudio;
+	private final ConfigData     mConfig;
     
     private Actor   mBackgroundActor;
-	private Actor   mButtonActor;
+	private Actor   mWebsiteActor;
+	private Actor   mFullVersionActor;
 	private boolean mIsTouched;
 	private float   mScale;
 	
 	public OptionsScreen(
 			final LevelCallback callback,
 			final TextureManager textures,
-			final AudioManager audio) {
+			final AudioManager audio,
+			final ConfigData config) {
 		mStage = new Stage(0, 0, true);
 		mCallback = callback;
 		mTextures = textures;
 		mAudio = audio;
+		mConfig = config;
 	}
 
 	@Override
@@ -114,53 +116,50 @@ public class OptionsScreen implements Screen, InputProcessor {
         final Actor logoActor = new Image(mTextures.logo.region);
         logoActor.setPosition(0f, 0f);
         setupActor(logoActor, TIME_0, TIME_1, logoScale);
+
+        mFullVersionActor = new Image(mTextures.optionsFullVersion.region);
+        mWebsiteActor = new Image(mTextures.optionsWebsite.region);
         
-        final Actor monkeyActor = new Image(mTextures.start.region);
-        monkeyActor.setPosition(
-        		gridBorder.getX() + BORDER_WIDTH,
-        		gridBorder.getY() - BORDER_WIDTH + (mTextures.gridBackground.getHeight() * mScale) - (monkeyActor.getHeight() * logoScale));
-        setupActor(monkeyActor, TIME_0, TIME_1, logoScale);
+        final Actor textActor = new Image(mTextures.optionsText.region);
+        final Actor textAdsActor = new Image(mTextures.optionsTextAds.region);
+        final float totalHeight = (mBackgroundActor.getHeight() * mScale) -
+        		((textActor.getHeight() + textAdsActor.getHeight() + mFullVersionActor.getHeight()) * logoScale);
+        final float offsetX = ((gridBorder.getWidth() * mScale) - (textActor.getWidth() * logoScale)) / 2f;
         
-        final Actor voyageGamesActor = new Image(mTextures.voyageGames.region);
-        voyageGamesActor.setPosition(
-        		monkeyActor.getX() + (monkeyActor.getWidth() * logoScale),
-        		monkeyActor.getY() + (voyageGamesActor.getHeight() * logoScale / 4f));
-        setupActor(voyageGamesActor, TIME_0, TIME_1, logoScale);
+        textActor.setPosition(
+        		mBackgroundActor.getX() + offsetX,
+        		mBackgroundActor.getY() + (totalHeight / 2f) + ((textAdsActor.getHeight() + mFullVersionActor.getHeight()) * logoScale));
+        setupActor(textActor, TIME_0, TIME_1, logoScale);
         
-        final Actor musicActor = new Image(mTextures.music.region);
-        musicActor.setPosition(
-        		gridBorder.getX() + BORDER_WIDTH,
-        		monkeyActor.getY() - (musicActor.getHeight() * logoScale));
-        setupActor(musicActor, TIME_0, TIME_1, logoScale);
+        mWebsiteActor.setPosition(
+        		textActor.getX(),
+        		textActor.getY() + ((textActor.getHeight() - WEBSITE_OFFSET_Y - mWebsiteActor.getHeight()) * logoScale));
+        setupActor(mWebsiteActor, TIME_0, TIME_1, logoScale);
+        mWebsiteActor.setTouchable(Touchable.enabled);
         
-        final Actor soundJayActor = new Image(mTextures.soundJay.region);
-        soundJayActor.setPosition(
-        		musicActor.getX() + (musicActor.getWidth() * logoScale),
-        		musicActor.getY() + (soundJayActor.getHeight() * logoScale / 4f));
-        setupActor(soundJayActor, TIME_0, TIME_1, logoScale);
-        
-        mButtonActor = new Image(mTextures.start.region);
-        mButtonActor.setPosition(
-        		gridBorder.getX() + (gridBorder.getWidth() * mScale / 2f) - (mButtonActor.getWidth() * mScale) / 2f,
-        		gridBorder.getY());
-        mButtonActor.setOrigin(mButtonActor.getWidth() * mScale / 2f, mButtonActor.getHeight() * mScale / 2f);
-        setupActor(mButtonActor, TIME_4, TIME_1, mScale);
-        mButtonActor.addAction(Actions.touchable(Touchable.enabled));
-        mButtonActor.addAction(Actions.scaleTo(SCALE_SIZE * mScale, SCALE_SIZE * mScale));
-        addStartButtonActions();
-        
+        if (mConfig.showFullVersion) {
+            textAdsActor.setPosition(
+            		mBackgroundActor.getX() + offsetX,
+            		mBackgroundActor.getY() + (totalHeight / 2f) + (mFullVersionActor.getHeight() * logoScale));
+            setupActor(textAdsActor, TIME_0, TIME_1, logoScale);
+            
+	        mFullVersionActor.setPosition(
+	        		textActor.getX(),
+	        		textActor.getY() - ((textAdsActor.getHeight() + mFullVersionActor.getHeight()) * logoScale));
+	        setupActor(mFullVersionActor, TIME_0, TIME_1, logoScale);
+	        mFullVersionActor.setTouchable(Touchable.enabled);
+        }
 	}
 	
 	@Override
 	public boolean touchDown(final int x, final int y, final int pointer, final int button) {
 		final Actor a = mStage.hit(x, mStage.getHeight() - y, true);
 		
-		if (a != mButtonActor) {
+		if (a != mWebsiteActor && a != mFullVersionActor) {
 			return false;
 		}
 
 		mIsTouched = true;
-		mButtonActor.clearActions();
 		return true;
 	}
 
@@ -172,15 +171,13 @@ public class OptionsScreen implements Screen, InputProcessor {
 
 		final Actor a = mStage.hit(x, mStage.getHeight() - y, true);
 		
-		if (a == mButtonActor) {
-			mStage.clear();
-			mCallback.levelComplete(0);
-			return true;
+		if (a == mWebsiteActor) {
+			mCallback.launchWebsite();
+		} else if (a == mFullVersionActor) {
+			mCallback.launchFullVersion();
 		}
 
 		mIsTouched = false;
-		mButtonActor.clearActions();
-		addStartButtonActions();
 		return true;
 	}
 
@@ -206,13 +203,6 @@ public class OptionsScreen implements Screen, InputProcessor {
         	));
 		actor.setScale(scale);
         mStage.addActor(actor);
-	}
-	
-	private void addStartButtonActions() {
-        mButtonActor.addAction(Actions.forever(Actions.sequence(
-        		Actions.scaleTo(mScale, mScale, TIME_3),
-        		Actions.scaleTo(SCALE_SIZE * mScale, SCALE_SIZE * mScale, TIME_3)
-        	)));
 	}
 	
 	//

@@ -21,9 +21,10 @@ public class TextureManager {
     public BundledTexture title;
     public BundledTexture logo;
     public BundledTexture options;
-    public BundledTexture music;
-    public BundledTexture voyageGames;
-    public BundledTexture soundJay;
+    public BundledTexture optionsText;
+    public BundledTexture optionsTextAds;
+    public BundledTexture optionsWebsite;
+    public BundledTexture optionsFullVersion;
     public BundledTexture gridBackground;
     
     public TextureManager(final int maxGrids, final int maxTokens) {
@@ -45,9 +46,10 @@ public class TextureManager {
         title = new BundledTexture("misc/title.png", 468, 75);
         logo = new BundledTexture("misc/logo.png", 128, 128);
         options = new BundledTexture("misc/gear.png", 128, 128);
-        music = new BundledTexture("misc/music.png", 128, 128);
-        voyageGames = new BundledTexture("misc/title.png", 435, 65, 0, 80);
-        soundJay = new BundledTexture("misc/title.png", 445, 65, 0, 145);
+        optionsText = new BundledTexture("misc/options.png", 580, 360);
+        optionsTextAds = new BundledTexture("misc/options.png", 580, 60, 0, 360);
+        optionsWebsite = new BundledTexture("misc/options_buttons.png", 480, 73, 0, 73);
+        optionsFullVersion = new BundledTexture("misc/options_buttons.png", 480, 73, 0, 0);
 
         digits[0] = new BundledTexture("misc/digits0.png", 96, 120);
         digits[1] = new BundledTexture("misc/digits1.png", 66, 120);
@@ -115,9 +117,10 @@ public class TextureManager {
 		title.texture.dispose();
 		logo.texture.dispose();
 		options.texture.dispose();
-		music.texture.dispose();
-		voyageGames.texture.dispose();
-		soundJay.texture.dispose();
+		optionsText.texture.dispose();
+		optionsTextAds.texture.dispose();
+		optionsWebsite.texture.dispose();
+		optionsFullVersion.texture.dispose();
 		
 		for (final BundledTexture t : digits) {
 			t.texture.dispose();

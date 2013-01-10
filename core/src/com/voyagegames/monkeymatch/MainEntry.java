@@ -17,9 +17,10 @@ public class MainEntry implements IApplicationProvider {
 	
 	public static void main(final String[] args) {
 		final MainEntry m = new MainEntry();
-		final LwjglApplication app = new LwjglApplication(
-				new ScreenManager(m, new StubLogger(), new StubDataProvider()), "Demo", 800, 600, true);
+		final ScreenManager mgr = new ScreenManager(m, new StubLogger(), new StubDataProvider());
+		final LwjglApplication app = new LwjglApplication(mgr, "Demo", 800, 600, true);
 		
+		mgr.setConfig(new ConfigData(true));
 		m.app = app;
 	}
 
@@ -47,6 +48,21 @@ public class MainEntry implements IApplicationProvider {
 	@Override
 	public Sound openSound(final String path) {
 		return Gdx.audio.newSound(new FileHandle("assets/" + path));
+	}
+
+	@Override
+	public void launchWebsite() {
+		System.out.println("launchWebsite()");
+	}
+
+	@Override
+	public void launchFullVersion() {
+		System.out.println("launchFullVersion()");
+	}
+
+	@Override
+	public void launchReview() {
+		System.out.println("launchReview()");
 	}
 
 }

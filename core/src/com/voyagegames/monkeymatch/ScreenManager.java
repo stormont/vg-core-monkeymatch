@@ -28,6 +28,7 @@ public class ScreenManager extends Game implements LevelCallback {
     private Screen mScreen;
     private int mLevelCount;
     private int mTotalScore;
+    private ConfigData mConfig;
     
     public ScreenManager(final IApplicationProvider app, final ILogger logger, final IDataProvider dataProvider) {
     	super();
@@ -37,6 +38,11 @@ public class ScreenManager extends Game implements LevelCallback {
         mFPSLogger = new FPSLogger();
         mTextures = new TextureManager(49, 5);
         mAudio = new AudioManager(app);
+        mConfig = new ConfigData(false);
+    }
+    
+    public void setConfig(final ConfigData config) {
+    	mConfig = config;
     }
 
 	@Override
@@ -171,7 +177,7 @@ public class ScreenManager extends Game implements LevelCallback {
         		mTextures.disposeDynamic();
         	}
         	
-        	mScreen = new OptionsScreen(this, mTextures, mAudio);
+        	mScreen = new OptionsScreen(this, mTextures, mAudio, mConfig);
         	mLevelCount = MAIN_MENU_LEVEL;
         	
             setScreen(mScreen);
@@ -198,6 +204,21 @@ public class ScreenManager extends Game implements LevelCallback {
 		
 		mLevelCount = MAIN_MENU_LEVEL;
 		levelComplete(mTotalScore);
+	}
+
+	@Override
+	public void launchWebsite() {
+		mApp.launchWebsite();
+	}
+
+	@Override
+	public void launchFullVersion() {
+		mApp.launchFullVersion();
+	}
+
+	@Override
+	public void launchReview() {
+		mApp.launchReview();
 	}
 
 }

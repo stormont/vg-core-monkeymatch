@@ -3,6 +3,8 @@ package com.voyagegames.monkeymatch.android;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
@@ -30,24 +32,11 @@ public class MainActivity extends AndroidApplication implements IApplicationProv
 	}
 
 	@Override
-	public void finish() {
-		this.exit();
-		
-		if (mManager != null) {
-			mManager.dispose();
-			mManager = null;
-		}
-
-		super.finish();
-	}
-
-	@Override
 	protected void onDestroy() {
 		this.exit();
 		
 		if (mManager != null) {
 			mManager.dispose();
-			mManager = null;
 		}
 
 		super.onDestroy();
@@ -71,6 +60,25 @@ public class MainActivity extends AndroidApplication implements IApplicationProv
 	@Override
 	public Sound openSound(final String path) {
 		return Gdx.audio.newSound(Gdx.files.internal(path));
+	}
+
+	@Override
+	public void launchWebsite() {
+		final String url = "http://www.voyagegames.com";
+		final Intent intent = new Intent(Intent.ACTION_VIEW);
+		
+		intent.setData(Uri.parse(url));
+		startActivity(intent);
+	}
+
+	@Override
+	public void launchFullVersion() {
+		startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("market://details?id=com.voyagegames.monkeymatch")));
+	}
+
+	@Override
+	public void launchReview() {
+		startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("market://details?id=com.voyagegames.monkeymatch")));
 	}
 	
 }
