@@ -463,7 +463,7 @@ public class LevelScreen implements Screen, InputProcessor {
         mGridBoxes.add(gridBox);
         
         actor.setPosition(((e.x + mLevel.tokenX) * mScale) + gridX, ((e.y + mLevel.tokenY) * mScale) + gridY);
-        setupActor(actor, 2f, 0.5f, mLevel.tokenScale * mScale);
+        setupActor(actor, 2f, TIME_0, mLevel.tokenScale * mScale);
         actor.addAction(Actions.sequence(
         		Actions.delay(SPAWN_TIME * mLevel.spawnTime),
         		Actions.fadeOut(TIME_4),
