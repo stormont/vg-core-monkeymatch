@@ -2,7 +2,8 @@
 <resources>
 
     <string name="app_name">Monkey Match</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="dummy_button">Dummy Button</string>
+    <string name="review_prompt">Enjoying playing Monkey Match? Review our app!</string>
+    <string name="review_yes">Sure!</string>
+    <string name="review_no">Remind me later</string>
 
 </resources>

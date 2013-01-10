@@ -3,5 +3,8 @@
 
     <string name="app_name">Monkey Match Free!</string>
     <string name="admob_id">a150dbe97fe2db8</string>
+    <string name="review_prompt">Enjoying playing Monkey Match? Review our app!</string>
+    <string name="review_yes">Sure!</string>
+    <string name="review_no">Remind me later</string>
 
 </resources>
