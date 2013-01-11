@@ -21,6 +21,9 @@ public class ReviewActivity extends Activity {
         		.setPositiveButton(R.string.review_yes, new DialogInterface.OnClickListener() {
         			@Override
         			public void onClick(final DialogInterface dialog, final int id) {
+        				final DataProvider db = new DataProvider(ReviewActivity.this);
+        				db.setGameReviewed();
+        				
         				startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("market://details?id=com.voyagegames.monkeymatch")));
         				finish();
         			}

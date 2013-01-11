@@ -11,7 +11,19 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		startActivityForResult(new Intent(this, ReviewActivity.class), REVIEW_ID);
+
+		final DataProvider db = new DataProvider(this);
+		
+		if (!db.hasGamePreviouslyLaunched()) {
+			db.setGamePreviouslyLaunched();
+			startActivity(new Intent(this, GameActivity.class));
+			finish();
+		} else if (!db.hasGameBeenReviewed()) {
+			startActivityForResult(new Intent(this, ReviewActivity.class), REVIEW_ID);
+		} else {
+			startActivity(new Intent(this, GameActivity.class));
+			finish();
+		}
 	}
 
 	@Override

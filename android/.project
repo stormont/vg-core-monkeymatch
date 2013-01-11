@@ -146,5 +146,10 @@
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/core/src/com/voyagegames/monkeymatch/screens/OptionsScreen.java</locationURI>
 		</link>
+		<link>
+			<name>src/com/voyagegames/monkeymatch/screens/TutorialScreen.java</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/core/src/com/voyagegames/monkeymatch/screens/TutorialScreen.java</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>
