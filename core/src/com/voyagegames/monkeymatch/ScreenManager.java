@@ -12,10 +12,11 @@ import com.voyagegames.monkeymatch.screens.EndGameScreen;
 import com.voyagegames.monkeymatch.screens.LevelCallback;
 import com.voyagegames.monkeymatch.screens.LevelScreen;
 import com.voyagegames.monkeymatch.screens.OptionsScreen;
+import com.voyagegames.monkeymatch.screens.TutorialScreen;
 
 public class ScreenManager extends Game implements LevelCallback {
 	
-	private static final int MAX_LEVELS = 8;
+	private static final int MAX_LEVELS = 9;
 	private static final int MAIN_MENU_LEVEL = MAX_LEVELS - 1;
 
 	private final IApplicationProvider mApp;
@@ -133,24 +134,27 @@ public class ScreenManager extends Game implements LevelCallback {
         		mScreen = new EndGameScreen(mTotalScore, mDataProvider.personalBest(), this, mTextures, mAudio);
         		break;
         	case 1:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level01.xml"), mTotalScore, this, mTextures, mAudio);
+            	mScreen = new TutorialScreen(this, mTextures, mAudio);
         		break;
         	case 2:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level02.xml"), mTotalScore, this, mTextures, mAudio);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level01.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 3:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level03.xml"), mTotalScore, this, mTextures, mAudio);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level02.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 4:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level04.xml"), mTotalScore, this, mTextures, mAudio);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level03.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 5:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level05.xml"), mTotalScore, this, mTextures, mAudio);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level04.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 6:
-            	mScreen = new LevelScreen(mApp.openAsset("levels/level06.xml"), mTotalScore, this, mTextures, mAudio);
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level05.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	case 7:
+            	mScreen = new LevelScreen(mApp.openAsset("levels/level06.xml"), mTotalScore, this, mTextures, mAudio);
+        		break;
+        	case 8:
             	mScreen = new LevelScreen(mApp.openAsset("levels/level07.xml"), mTotalScore, this, mTextures, mAudio);
         		break;
         	}
